@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arquitectura del Sistema - Proyecto Lumen</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              dark: '#070a11',
+              card: '#0f172a',
+              border: '#1e293b',
+              accent: '#38bdf8',
+              pwa: '#10b981',
+              unity: '#a855f7',
+              mobile: '#f59e0b',
+              api: '#3b82f6'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #070a11;
+      color: #f1f5f9;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.05) 0%, transparent 40%);
+    }
+
+    /* Grid background */
+    .bg-grid {
+      background-size: 30px 30px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+
+    /* Animated glowing lines */
+    @keyframes flowLine {
+      from { stroke-dashoffset: 40; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    .flow-path {
+      stroke-dasharray: 8, 8;
+      animation: flowLine 1.2s linear infinite;
+    }
+
+    .glow-cyan { filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.6)); }
+    .glow-purple { filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.6)); }
+    .glow-emerald { filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.6)); }
+    .glow-amber { filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.6)); }
+
+    /* Glassmorphism Cards */
+    .arch-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .arch-card:hover {
+      border-color: rgba(56, 189, 248, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.15);
+    }
+
+    .active-flow {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.3) !important;
+    }
+
+    /* Drawer animation */
+    .drawer {
+      transition: transform 0.3s ease-in-out;
+    }
+    .drawer-closed {
+      transform: translateX(100%);
+    }
+    .drawer-open {
+      transform: translateX(0);
+    }
+  </style>
+</head>
+<body class="bg-grid min-h-screen flex flex-col font-sans antialiased selection:bg-cyan-500 selection:text-black">
+
+  <!-- Header Header Navbar -->
+  <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40 px-6 py-4">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="p-2.5 rounded-xl bg-gradient-to-tr from-cyan-500/20 to-purple-500/20 border border-cyan-500/30">
+          <i data-lucide="cpu" class="w-6 h-6 text-cyan-400"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-bold text-xl tracking-tight text-white">Proyecto Lumen — Arquitectura del Sistema</h1>
+            <span class="px-2 py-0.5 text-xs font-mono bg-cyan-950 text-cyan-400 border border-cyan-800 rounded-full">v1.0 (Archify Style)</span>
+          </div>
+          <p class="text-xs text-slate-400">Ecosistema Multiplataforma: Juego Unity + PWA + App Móvil + API Unificada</p>
+        </div>
+      </div>
+
+      <!-- Action & View Controls -->
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs font-mono text-slate-400 mr-1">Filtrar Flujo:</span>
+        <button onclick="setFlow('all')" id="btn-all" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-500/30 transition">
+          🌐 Todo
+        </button>
+        <button onclick="setFlow('unity')" id="btn-unity" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:bg-purple-950/50 hover:text-purple-300 transition">
+          🎮 Unity Cloud Sync
+        </button>
+        <button onclick="setFlow('pwa')" id="btn-pwa" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:bg-emerald-950/50 hover:text-emerald-300 transition">
+          📱 PWA Codex & Map
+        </button>
+        <button onclick="setFlow('mobile')" id="btn-mobile" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:bg-amber-950/50 hover:text-amber-300 transition">
+          📲 App Móvil (RN)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Canvas Container -->
+  <main class="flex-grow max-w-7xl w-full mx-auto p-6 flex flex-col gap-8 relative">
+
+    <!-- Priority Status Alert -->
+    <div class="bg-gradient-to-r from-slate-900 via-slate-900/90 to-purple-950/40 border border-purple-500/30 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-purple-500/10 rounded-lg border border-purple-500/20">
+          <i data-lucide="target" class="w-5 h-5 text-purple-400"></i>
+        </div>
+        <div>
+          <h2 class="text-sm font-semibold text-purple-200">Estrategia de Desarrollo (2 Meses)</h2>
+          <p class="text-xs text-slate-400">Capa de datos compartida única para evitar mantener múltiples fuentes de verdad.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 text-xs font-mono">
+        <span class="px-2.5 py-1 bg-purple-900/40 border border-purple-700/50 text-purple-300 rounded-md">P1: Juego Acto I/II</span>
+        <span class="px-2.5 py-1 bg-cyan-900/40 border border-cyan-700/50 text-cyan-300 rounded-md">P2: API Mínima</span>
+        <span class="px-2.5 py-1 bg-emerald-900/40 border border-emerald-700/50 text-emerald-300 rounded-md">P3: PWA Terminal</span>
+        <span class="px-2.5 py-1 bg-amber-900/40 border border-amber-700/50 text-amber-300 rounded-md">P4: Mobile Client</span>
+      </div>
+    </div>
+
+    <!-- ARCHITECTURE DIAGRAM GRID -->
+    <div class="relative grid grid-cols-1 lg:grid-cols-12 gap-8 my-4">
+
+      <!-- ================= LAYER 1: CLIENTES / FRONTEND ================= -->
+      <div class="lg:col-span-5 flex flex-col gap-4">
+        <div class="flex items-center gap-2 pb-2 border-b border-slate-800">
+          <i data-lucide="monitor-smartphone" class="w-4 h-4 text-cyan-400"></i>
+          <span class="text-xs font-mono font-bold tracking-wider text-slate-300 uppercase">Capa 1: Clientes y Aplicaciones Satélite</span>
+        </div>
+
+        <!-- Unity Game Node -->
+        <div onclick="openDrawer('node-unity')" id="card-unity" class="arch-card p-5 rounded-2xl cursor-pointer relative group">
+          <div class="absolute -top-2.5 -right-2.5 px-2.5 py-0.5 bg-purple-950 border border-purple-500/50 text-purple-300 font-mono text-[10px] rounded-full">
+            PRIORIDAD 1
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="p-3 bg-purple-500/10 rounded-xl border border-purple-500/30 text-purple-400 group-hover:scale-110 transition">
+              <i data-lucide="gamepad-2" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-100 flex items-center gap-2">
+                Juego Principal Unity
+                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-purple-400 transition"></i>
+              </h3>
+              <p class="text-xs text-slate-400 mt-1">Motor de juego con lógica local. Sincroniza estado global en la nube vía API.</p>
+              <div class="flex flex-wrap gap-1.5 mt-3">
+                <span class="px-2 py-0.5 text-[10px] font-mono bg-purple-900/30 text-purple-300 border border-purple-800/50 rounded">Acto I & II</span>
+                <span class="px-2 py-0.5 text-[10px] font-mono bg-slate-800 text-slate-300 rounded">C# / C standard JSON</span>
+                <span class="px-2 py-0.5 text-[10px] font-mono bg-cyan-950 text-cyan-400 rounded">Cloud Sync</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PWA Node -->
+        <div onclick="openDrawer('node-pwa')" id="card-pwa" class="arch-card p-5 rounded-2xl cursor-pointer relative group">
+          <div class="absolute -top-2.5 -right-2.5 px-2.5 py-0.5 bg-emerald-950 border border-emerald-500/50 text-emerald-300 font-mono text-[10px] rounded-full">
+            PRIORIDAD 3
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/30 text-emerald-400 group-hover:scale-110 transition">
+              <i data-lucide="globe" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-100 flex items-center gap-2">
+                PWA: "Terminal de Lumen"
+                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition"></i>
+              </h3>
+              <p class="text-xs text-slate-400 mt-1">Compañera web del juego. Codex/Enciclopedia, mapa interactivo y modo offline.</p>
+              <div class="flex flex-wrap gap-1.5 mt-3">
+                <span class="px-2 py-0.5 text-[10px] font-mono bg-emerald-950 text-emerald-300 border border-emerald-800/50 rounded">Service Worker</span>
+                <span class="px-2 py-0.5 text-[10px] font-mono bg-slate-800 text-slate-300 rounded">Mapa Interactivo</span>
+                <span class="px-2 py-0.5 text-[10px] font-mono bg-slate-800 text-slate-300 rounded">Offline First</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile App Node -->
+        <div onclick="openDrawer('node-mobile')" id="card-mobile" class="arch-card p-5 rounded-2xl cursor-pointer relative group">
+          <div class="absolute -top-2.5 -right-2.5 px-2.5 py-0.5 bg-amber-950 border border-amber-500/50 text-amber-300 font-mono text-[10px] rounded-full">
+            PRIORIDAD 4
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="p-3 bg-amber-500/10 rounded-xl border border-amber-500/30 text-amber-400 group-hover:scale-110 transition">
+              <i data-lucide="smartphone" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-100 flex items-center gap-2">
+                App Móvil Compañera
+                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition"></i>
+              </h3>
+              <p class="text-xs text-slate-400 mt-1">Cliente móvil optimizado para consulta rápida de progreso y lore.</p>
+              <div class="flex flex-wrap gap-1.5 mt-3">
+                <span class="px-2 py-0.5 text-[10px] font-mono bg-amber-950 text-amber-300 border border-amber-800/50 rounded">React Native</span>
+                <span class="px-2 py-0.5 text-[10px] font-mono bg-slate-800 text-slate-300 rounded">Componentes Reutilizados</span>
+                <span class="px-2 py-0.5 text-[10px] font-mono bg-slate-800 text-slate-400 rounded">Opcional: WearOS (Compose)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- MIDDLE ANIMATED CONNECTIONS (DESKTOP) -->
+      <div class="hidden lg:flex lg:col-span-2 items-center justify-center relative">
+        <svg class="w-full h-full min-h-[380px]" viewBox="0 0 100 300" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="grad-cyan" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#a855f7" />
+              <stop offset="100%" stop-color="#3b82f6" />
+            </linearGradient>
+            <linearGradient id="grad-pwa" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#10b981" />
+              <stop offset="100%" stop-color="#3b82f6" />
+            </linearGradient>
+            <linearGradient id="grad-mobile" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#f59e0b" />
+              <stop offset="100%" stop-color="#3b82f6" />
+            </linearGradient>
+          </defs>
+
+          <!-- Unity to Backend Line -->
+          <path id="path-unity" d="M 0 55 C 50 55, 50 150, 100 150" fill="none" stroke="url(#grad-cyan)" stroke-width="2.5" class="flow-path glow-purple" />
+          
+          <!-- PWA to Backend Line -->
+          <path id="path-pwa" d="M 0 150 L 100 150" fill="none" stroke="url(#grad-pwa)" stroke-width="2.5" class="flow-path glow-emerald" />
+
+          <!-- Mobile to Backend Line -->
+          <path id="path-mobile" d="M 0 245 C 50 245, 50 150, 100 150" fill="none" stroke="url(#grad-mobile)" stroke-width="2.5" class="flow-path glow-amber" />
+        </svg>
+      </div>
+
+      <!-- ================= LAYER 2 & 3: API & BACKEND ================= -->
+      <div class="lg:col-span-5 flex flex-col gap-4">
+        <div class="flex items-center gap-2 pb-2 border-b border-slate-800">
+          <i data-lucide="server" class="w-4 h-4 text-blue-400"></i>
+          <span class="text-xs font-mono font-bold tracking-wider text-slate-300 uppercase">Capa 2 & 3: Capa de Datos Compartida (API Central)</span>
+        </div>
+
+        <!-- Central API Card -->
+        <div onclick="openDrawer('node-api')" id="card-api" class="arch-card p-6 rounded-2xl cursor-pointer relative group border-blue-500/30">
+          <div class="absolute -top-2.5 -right-2.5 px-2.5 py-0.5 bg-blue-950 border border-blue-500/50 text-blue-300 font-mono text-[10px] rounded-full">
+            PRIORIDAD 2
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="p-3.5 bg-blue-500/10 rounded-xl border border-blue-500/30 text-blue-400 group-hover:scale-110 transition">
+              <i data-lucide="network" class="w-7 h-7"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+                API Central Ligera
+                <i data-lucide="chevron-right" class="w-5 h-5 text-slate-500 group-hover:text-blue-400 transition"></i>
+              </h3>
+              <p class="text-xs text-slate-300 mt-1">Fuente Única de Verdad (Single Source of Truth). Gestiona el estado y la enciclopedia del universo del juego.</p>
+              
+              <!-- Sub-modules of Central API -->
+              <div class="grid grid-cols-2 gap-2 mt-4">
+                <div class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
+                  <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
+                    <i data-lucide="book-open" class="w-3.5 h-3.5 text-cyan-400"></i>
+                    Codex & Lore
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Bestiario de Robots, Personajes y Archivos de Memoria.</p>
+                </div>
+                <div class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
+                  <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
+                    <i data-lucide="trophy" class="w-3.5 h-3.5 text-amber-400"></i>
+                    Progreso & Logros
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Estado del jugador, fragmentos desbloqueados y medallas.</p>
+                </div>
+                <div class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
+                  <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
+                    <i data-lucide="key-round" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    Auth Simplicada
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Cuentas de usuario o modo Invitado rápido.</p>
+                </div>
+                <div class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
+                  <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
+                    <i data-lucide="file-json" class="w-3.5 h-3.5 text-purple-400"></i>
+                    REST / GraphQL
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Intercambio estándar en formato JSON.</p>
+                </div>
+              </div>
+
+              <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-slate-400">
+                <span>Stack sugerido:</span>
+                <span class="text-cyan-300">Firebase / Supabase (Setup Rápido) ó Node+Express</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Database Storage Card -->
+        <div onclick="openDrawer('node-db')" id="card-db" class="arch-card p-4 rounded-2xl cursor-pointer relative group">
+          <div class="flex items-center gap-3">
+            <div class="p-2.5 bg-slate-800 rounded-xl text-slate-300 border border-slate-700 group-hover:text-cyan-400 transition">
+              <i data-lucide="database" class="w-5 h-5"></i>
+            </div>
+            <div class="flex-grow">
+              <h4 class="font-semibold text-sm text-slate-200">Base de Datos / Storage de Contenido</h4>
+              <p class="text-xs text-slate-400">Persistencia de coleccionables, coordenadas del mapa y perfiles.</p>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ROADMAP / TIMELINE SECTION -->
+    <div class="mt-6 p-6 rounded-2xl bg-slate-950/60 border border-slate-800">
+      <div class="flex items-center gap-2 mb-4">
+        <i data-lucide="calendar" class="w-5 h-5 text-cyan-400"></i>
+        <h3 class="font-bold text-slate-100">Cronograma Sugerido de 2 Meses</h3>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="p-4 rounded-xl bg-purple-950/20 border border-purple-500/30">
+          <span class="text-xs font-mono font-bold text-purple-400">Fase 1 (Semanas 1-3)</span>
+          <h4 class="font-semibold text-sm text-slate-200 mt-1">Juego Unity Acto I y II</h4>
+          <p class="text-xs text-slate-400 mt-1">Completar gameplay principal. Dejar preparado conector HTTP REST para API.</p>
+        </div>
+        <div class="p-4 rounded-xl bg-cyan-950/20 border border-cyan-500/30">
+          <span class="text-xs font-mono font-bold text-cyan-400">Fase 2 (Semanas 3-5)</span>
+          <h4 class="font-semibold text-sm text-slate-200 mt-1">API Central Mínima</h4>
+          <p class="text-xs text-slate-400 mt-1">Endpoints de Auth invitado + CRUD del Codex de Robots + Endpoint de Progreso.</p>
+        </div>
+        <div class="p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/30">
+          <span class="text-xs font-mono font-bold text-emerald-400">Fase 3 (Semanas 5-7)</span>
+          <h4 class="font-semibold text-sm text-slate-200 mt-1">PWA Terminal de Lumen</h4>
+          <p class="text-xs text-slate-400 mt-1">UI navegable de lore, mapa de la ciudad y Service Worker para uso offline.</p>
+        </div>
+        <div class="p-4 rounded-xl bg-amber-950/20 border border-amber-500/30">
+          <span class="text-xs font-mono font-bold text-amber-400">Fase 4 (Semanas 7-8)</span>
+          <h4 class="font-semibold text-sm text-slate-200 mt-1">App Móvil React Native</h4>
+          <p class="text-xs text-slate-400 mt-1">Consumo de la misma API, testing multiplataforma (+ WearOS opcional).</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 bg-slate-950 py-4 text-center text-xs text-slate-500">
+    <p>Proyecto Universitario Lumen — Diseñado para desplegar directamente en GitHub Pages.</p>
+  </footer>
+
+  <!-- DETAIL DRAWER (SLIDE OVER) -->
+  <div id="drawer-backdrop" onclick="closeDrawer()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden transition-opacity"></div>
+  
+  <div id="drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-slate-900 border-l border-slate-800 z-50 p-6 overflow-y-auto drawer drawer-closed shadow-2xl flex flex-col justify-between">
+    <div>
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span id="drawer-icon" class="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"></span>
+          <h3 id="drawer-title" class="font-bold text-lg text-white">Detalle del Componente</h3>
+        </div>
+        <button onclick="closeDrawer()" class="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="mt-6 flex flex-col gap-4">
+        <div>
+          <span class="text-[11px] font-mono text-slate-500 uppercase tracking-wider">Descripción Tecnológica</span>
+          <p id="drawer-desc" class="text-sm text-slate-300 mt-1 leading-relaxed"></p>
+        </div>
+
+        <div>
+          <span class="text-[11px] font-mono text-slate-500 uppercase tracking-wider">Responsabilidad Principal</span>
+          <ul id="drawer-responsibilities" class="mt-2 space-y-2 text-xs text-slate-300"></ul>
+        </div>
+
+        <div>
+          <span class="text-[11px] font-mono text-slate-500 uppercase tracking-wider">Intercambio de Datos / JSON Endpoints</span>
+          <div id="drawer-endpoints" class="mt-2 p-3 rounded-lg bg-slate-950 font-mono text-xs text-cyan-300 border border-slate-800 overflow-x-auto"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pt-6 border-t border-slate-800 mt-6">
+      <button onclick="closeDrawer()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition">
+        Cerrar Panel
+      </button>
+    </div>
+  </div>
+
+  <!-- JavaScript for Interactions -->
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Node Data details for Drawer
+    const nodeDetails = {
+      'node-unity': {
+        title: 'Juego Principal Unity',
+        icon: 'gamepad-2',
+        color: 'text-purple-400',
+        desc: 'El núcleo jugable desarrollado en Unity para los Actos I y II. La lógica del juego (físicas, combate, niveles) corre localmente para no depender de latencia de red.',
+        responsibilities: [
+          '🎮 Renderizado del juego e interactividad del Acto I y II.',
+          '💾 Generación de guardados locales y eventos de progreso.',
+          '☁️ Envío asíncrono de avances (logros, robots descubiertos) a la API Central en JSON.',
+          '🔄 Consumo de la API para restaurar progreso si el usuario cambia de dispositivo.'
+        ],
+        endpoints: `POST /api/v1/sync/progress\nGET  /api/v1/user/profile\nPOST /api/v1/achievements/unlock`
+      },
+      'node-pwa': {
+        title: 'PWA: Terminal de Lumen',
+        icon: 'globe',
+        color: 'text-emerald-400',
+        desc: 'Aplicación Web Progresiva instalable que actúa como codex/terminal complementario. Permite consultar lore y mapa fuera del juego.',
+        responsibilities: [
+          '📖 Enciclopedia/Codex navegable de robots, personajes y lore.',
+          '🗺️ Mapa interactivo de la ciudad con marcadores de coleccionables.',
+          '📶 Cacheo inteligente vía Service Workers para permitir lectura sin conexión a internet.',
+          '📱 Instalable en pantalla de inicio en Android/iOS/Desktop sin tienda.'
+        ],
+        endpoints: `GET /api/v1/codex/robots\nGET /api/v1/map/points-of-interest\nGET /api/v1/user/memories`
+      },
+      'node-mobile': {
+        title: 'App Móvil Compañera',
+        icon: 'smartphone',
+        color: 'text-amber-400',
+        desc: 'Cliente alternativo desarrollado en React Native para consulta ultrarrápida en smartphones. Reutiliza componentes UI/lógica de la PWA.',
+        responsibilities: [
+          '⚡ Dashboard táctil rápido para ver logros e inventario de lore.',
+          '♻️ Reutilización de estilos y modelos TypeScript del backend/PWA.',
+          '⌚ Extendible opcionalmente a relojes WearOS usando Jetpack Compose para alertas o resúmenes.'
+        ],
+        endpoints: `GET /api/v1/user/summary\nGET /api/v1/codex/quick-search`
+      },
+      'node-api': {
+        title: 'API Central Ligera',
+        icon: 'network',
+        color: 'text-blue-400',
+        desc: 'Capa de backend que desacopla la lógica del juego de la presentación de los datos. Garantiza una Única Fuente de Verdad (Single Source of Truth).',
+        responsibilities: [
+          '🔑 Autenticación liviana (Usuario registrado o Token de Invitado rápido).',
+          '📦 Servicio de datos estructurados en formato REST o GraphQL.',
+          '🛡️ Validación de logros y almacenamiento de los fragmentos de memoria desbloqueados.',
+          '⚡ Recomendación: Usar Firebase/Supabase para ahorrarse la infraestructura inicial.'
+        ],
+        endpoints: `POST /api/v1/auth/guest\nGET  /api/v1/codex/all\nPUT  /api/v1/player/progress`
+      },
+      'node-db': {
+        title: 'Base de Datos y Persistencia',
+        icon: 'database',
+        color: 'text-slate-300',
+        desc: 'Almacenamiento persistente del contenido global y de los estados de los jugadores.',
+        responsibilities: [
+          '📄 Colecciones de datos estáticos (Codex de robots, descripciones, imágenes).',
+          '👤 Tablas/Documentos de usuarios, partidas guardadas y progreso.',
+          '📍 Coordenadas y metadatos del mapa de la ciudad.'
+        ],
+        endpoints: `PostgreSQL / Firestore NoSQL DB Structure`
+      }
+    };
+
+    // Open Drawer Function
+    function openDrawer(nodeId) {
+      const data = nodeDetails[nodeId];
+      if (!data) return;
+
+      document.getElementById('drawer-title').innerText = data.title;
+      document.getElementById('drawer-desc').innerText = data.desc;
+      
+      // Icon
+      const iconContainer = document.getElementById('drawer-icon');
+      iconContainer.innerHTML = `<i data-lucide="${data.icon}" class="w-6 h-6 ${data.color}"></i>`;
+      
+      // Responsibilities
+      const respList = document.getElementById('drawer-responsibilities');
+      respList.innerHTML = data.responsibilities.map(r => `<li class="flex items-start gap-2"><span>•</span> <span>${r}</span></li>`).join('');
+
+      // Endpoints
+      document.getElementById('drawer-endpoints').innerHTML = `<pre>${data.endpoints}</pre>`;
+
+      // Re-render lucide inside drawer
+      lucide.createIcons();
+
+      // Show drawer
+      document.getElementById('drawer-backdrop').classList.remove('hidden');
+      setTimeout(() => {
+        document.getElementById('drawer').classList.remove('drawer-closed');
+        document.getElementById('drawer').classList.add('drawer-open');
+      }, 10);
+    }
+
+    // Close Drawer Function
+    function closeDrawer() {
+      document.getElementById('drawer').classList.remove('drawer-open');
+      document.getElementById('drawer').classList.add('drawer-closed');
+      setTimeout(() => {
+        document.getElementById('drawer-backdrop').classList.add('hidden');
+      }, 300);
+    }
+
+    // Flow Filter Function
+    function setFlow(flowType) {
+      const cardUnity = document.getElementById('card-unity');
+      const cardPwa = document.getElementById('card-pwa');
+      const cardMobile = document.getElementById('card-mobile');
+      const cardApi = document.getElementById('card-api');
+
+      const pathUnity = document.getElementById('path-unity');
+      const pathPwa = document.getElementById('path-pwa');
+      const pathMobile = document.getElementById('path-mobile');
+
+      // Reset styles
+      [cardUnity, cardPwa, cardMobile, cardApi].forEach(c => c?.classList.remove('active-flow'));
+      [pathUnity, pathPwa, pathMobile].forEach(p => {
+        if (p) p.style.opacity = '0.2';
+      });
+
+      if (flowType === 'all') {
+        [pathUnity, pathPwa, pathMobile].forEach(p => { if(p) p.style.opacity = '1'; });
+      } else if (flowType === 'unity') {
+        cardUnity?.classList.add('active-flow');
+        cardApi?.classList.add('active-flow');
+        if(pathUnity) pathUnity.style.opacity = '1';
+      } else if (flowType === 'pwa') {
+        cardPwa?.classList.add('active-flow');
+        cardApi?.classList.add('active-flow');
+        if(pathPwa) pathPwa.style.opacity = '1';
+      } else if (flowType === 'mobile') {
+        cardMobile?.classList.add('active-flow');
+        cardApi?.classList.add('active-flow');
+        if(pathMobile) pathMobile.style.opacity = '1';
+      }
+    }
+  </script>
+</body>
+</html>
