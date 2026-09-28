@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Arquitectura del Sistema - Proyecto Lumen</title>
+  <title>GameHub — Diagrama de Arquitectura Interactivo</title>
+  
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts: Inter & JetBrains Mono -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  
+
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -21,15 +22,18 @@
             mono: ['JetBrains Mono', 'monospace'],
           },
           colors: {
-            brand: {
-              dark: '#070a11',
+            hub: {
+              bg: '#080c14',
               card: '#0f172a',
               border: '#1e293b',
               accent: '#38bdf8',
-              pwa: '#10b981',
               unity: '#a855f7',
+              pwa: '#10b981',
               mobile: '#f59e0b',
-              api: '#3b82f6'
+              keycloak: '#6366f1',
+              api: '#0284c7',
+              data: '#ec4899',
+              infra: '#14b8a6'
             }
           }
         }
@@ -39,59 +43,78 @@
 
   <style>
     body {
-      background-color: #070a11;
+      background-color: #060911;
       color: #f1f5f9;
       background-image: 
-        radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.05) 0%, transparent 40%),
-        radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.05) 0%, transparent 40%);
+        radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.05) 0%, transparent 40%);
     }
 
-    /* Grid background */
+    /* Grid layout background */
     .bg-grid {
-      background-size: 30px 30px;
+      background-size: 28px 28px;
       background-image: 
         linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
     }
 
-    /* Animated glowing lines */
-    @keyframes flowLine {
-      from { stroke-dashoffset: 40; }
+    /* Architectural card styling */
+    .arch-node {
+      background: rgba(15, 23, 42, 0.82);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .arch-node:hover {
+      border-color: rgba(56, 189, 248, 0.5);
+      box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(56, 189, 248, 0.2);
+    }
+
+    /* State modifier classes */
+    .node-highlighted {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.5) !important;
+      transform: translateY(-2px) scale(1.01);
+      z-index: 20 !important;
+    }
+
+    .node-dimmed {
+      opacity: 0.25 !important;
+      filter: grayscale(80%);
+    }
+
+    .node-related {
+      border-color: #a855f7 !important;
+      box-shadow: 0 0 15px rgba(168, 85, 247, 0.3) !important;
+      opacity: 1 !important;
+    }
+
+    /* SVG Connection Path Animations */
+    @keyframes flowAnimation {
+      from { stroke-dashoffset: 32; }
       to { stroke-dashoffset: 0; }
     }
 
-    .flow-path {
-      stroke-dasharray: 8, 8;
-      animation: flowLine 1.2s linear infinite;
+    .conn-path {
+      stroke-dasharray: 6, 6;
+      transition: all 0.3s ease;
     }
 
-    .glow-cyan { filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.6)); }
-    .glow-purple { filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.6)); }
-    .glow-emerald { filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.6)); }
-    .glow-amber { filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.6)); }
-
-    /* Glassmorphism Cards */
-    .arch-card {
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    .conn-path-active {
+      animation: flowAnimation 0.8s linear infinite;
+      stroke-width: 3.5px !important;
+      filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.8));
+      opacity: 1 !important;
     }
 
-    .arch-card:hover {
-      border-color: rgba(56, 189, 248, 0.4);
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.15);
+    .conn-path-dimmed {
+      opacity: 0.08 !important;
     }
 
-    .active-flow {
-      border-color: #38bdf8 !important;
-      box-shadow: 0 0 20px rgba(56, 189, 248, 0.3) !important;
-    }
-
-    /* Drawer animation */
-    .drawer {
-      transition: transform 0.3s ease-in-out;
+    /* Drawer Animation */
+    .drawer-transition {
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .drawer-closed {
       transform: translateX(100%);
@@ -99,433 +122,1224 @@
     .drawer-open {
       transform: translateX(0);
     }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090d16;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
   </style>
 </head>
-<body class="bg-grid min-h-screen flex flex-col font-sans antialiased selection:bg-cyan-500 selection:text-black">
 
-  <!-- Header Header Navbar -->
-  <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40 px-6 py-4">
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <div class="p-2.5 rounded-xl bg-gradient-to-tr from-cyan-500/20 to-purple-500/20 border border-cyan-500/30">
-          <i data-lucide="cpu" class="w-6 h-6 text-cyan-400"></i>
+<body class="bg-grid min-h-screen flex flex-col font-sans antialiased text-slate-100 selection:bg-cyan-500 selection:text-black">
+
+  <header class="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/85 backdrop-blur-md px-6 py-3.5">
+    <div class="max-w-[1600px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-4">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center gap-3.5">
+        <div class="p-2.5 rounded-xl bg-gradient-to-tr from-cyan-500/20 via-indigo-500/20 to-purple-500/20 border border-cyan-500/40 text-cyan-400">
+          <i data-lucide="gamepad-2" class="w-7 h-7"></i>
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="font-bold text-xl tracking-tight text-white">Proyecto Lumen — Arquitectura del Sistema</h1>
-            <span class="px-2 py-0.5 text-xs font-mono bg-cyan-950 text-cyan-400 border border-cyan-800 rounded-full">v1.0 (Archify Style)</span>
+            <h1 class="font-extrabold text-xl tracking-tight text-white">GameHub</h1>
+            <span class="text-xs font-mono px-2 py-0.5 bg-cyan-950 text-cyan-300 border border-cyan-700/50 rounded-full">Juega · Compite · Conecta</span>
           </div>
-          <p class="text-xs text-slate-400">Ecosistema Multiplataforma: Juego Unity + PWA + App Móvil + API Unificada</p>
+          <p class="text-xs text-slate-400">Diagrama de Arquitectura - Interacción Integrada (Unity, PWA y App Móvil)</p>
         </div>
       </div>
 
-      <!-- Action & View Controls -->
+      <!-- Quick Filter Presets & Controls -->
       <div class="flex flex-wrap items-center gap-2">
-        <span class="text-xs font-mono text-slate-400 mr-1">Filtrar Flujo:</span>
-        <button onclick="setFlow('all')" id="btn-all" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-500/30 transition">
-          🌐 Todo
+        <span class="text-xs font-mono text-slate-400 mr-1 flex items-center gap-1">
+          <i data-lucide="filter" class="w-3.5 h-3.5"></i> Filtros:
+        </span>
+        <button onclick="setFilter('all')" id="filter-all" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-500/30 transition">
+          🌐 Mostrar Todo
         </button>
-        <button onclick="setFlow('unity')" id="btn-unity" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:bg-purple-950/50 hover:text-purple-300 transition">
-          🎮 Unity Cloud Sync
+        <button onclick="setFilter('auth')" id="filter-auth" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:bg-indigo-950/60 hover:text-indigo-300 transition">
+          🔐 Flujo Autenticación (SSO / OIDC)
         </button>
-        <button onclick="setFlow('pwa')" id="btn-pwa" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:bg-emerald-950/50 hover:text-emerald-300 transition">
-          📱 PWA Codex & Map
+        <button onclick="setFilter('gameplay')" id="filter-gameplay" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:bg-emerald-950/60 hover:text-emerald-300 transition">
+          🏆 Partida / Leaderboard / REST
         </button>
-        <button onclick="setFlow('mobile')" id="btn-mobile" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:bg-amber-950/50 hover:text-amber-300 transition">
-          📲 App Móvil (RN)
+        <button onclick="setFilter('monitoring')" id="filter-monitoring" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:bg-purple-950/60 hover:text-purple-300 transition">
+          📊 Monitoreo & Logs
+        </button>
+        <button onclick="resetSelection()" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-900 text-slate-400 border border-slate-800 hover:bg-slate-800 hover:text-white transition flex items-center gap-1">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Restablecer
         </button>
       </div>
+
     </div>
   </header>
 
-  <!-- Main Canvas Container -->
-  <main class="flex-grow max-w-7xl w-full mx-auto p-6 flex flex-col gap-8 relative">
+  <main class="flex-grow max-w-[1600px] w-full mx-auto p-4 lg:p-6 flex flex-col gap-6 relative" id="main-content" onclick="handleCanvasClick(event)">
 
-    <!-- Priority Status Alert -->
-    <div class="bg-gradient-to-r from-slate-900 via-slate-900/90 to-purple-950/40 border border-purple-500/30 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
-      <div class="flex items-center gap-3">
-        <div class="p-2 bg-purple-500/10 rounded-lg border border-purple-500/20">
-          <i data-lucide="target" class="w-5 h-5 text-purple-400"></i>
-        </div>
-        <div>
-          <h2 class="text-sm font-semibold text-purple-200">Estrategia de Desarrollo (2 Meses)</h2>
-          <p class="text-xs text-slate-400">Capa de datos compartida única para evitar mantener múltiples fuentes de verdad.</p>
-        </div>
+    <!-- Instruction Helper Banner -->
+    <div class="bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 flex items-center justify-between text-xs text-slate-300">
+      <div class="flex items-center gap-2">
+        <i data-lucide="mouse-pointer-click" class="w-4 h-4 text-cyan-400 animate-bounce"></i>
+        <span><strong>Interactividad Completa:</strong> Haz clic en <strong>Unity</strong>, <strong>PWA</strong> o <strong>App Móvil</strong> para ver sus flujos independientes con Keycloak y la API Central.</span>
       </div>
-      <div class="flex items-center gap-2 text-xs font-mono">
-        <span class="px-2.5 py-1 bg-purple-900/40 border border-purple-700/50 text-purple-300 rounded-md">P1: Juego Acto I/II</span>
-        <span class="px-2.5 py-1 bg-cyan-900/40 border border-cyan-700/50 text-cyan-300 rounded-md">P2: API Mínima</span>
-        <span class="px-2.5 py-1 bg-emerald-900/40 border border-emerald-700/50 text-emerald-300 rounded-md">P3: PWA Terminal</span>
-        <span class="px-2.5 py-1 bg-amber-900/40 border border-amber-700/50 text-amber-300 rounded-md">P4: Mobile Client</span>
+      <div id="selection-status" class="font-mono text-cyan-400 font-semibold hidden md:block">
+        Estado: Vista General Completa
       </div>
     </div>
 
-    <!-- ARCHITECTURE DIAGRAM GRID -->
-    <div class="relative grid grid-cols-1 lg:grid-cols-12 gap-8 my-4">
+    <!-- MAIN DIAGRAM CONTAINER -->
+    <div class="relative w-full rounded-2xl bg-slate-950/40 border border-slate-800/80 p-4 lg:p-6 min-h-[750px]" id="diagram-container">
+      
+      <!-- DYNAMIC SVG CONNECTIONS OVERLAY -->
+      <svg id="connections-svg" class="absolute inset-0 w-full h-full pointer-events-none z-10">
+        <defs>
+          <marker id="arrow-default" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569" />
+          </marker>
+          <marker id="arrow-active" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#38bdf8" />
+          </marker>
+        </defs>
+        <g id="dynamic-paths-group"></g>
+      </svg>
 
-      <!-- ================= LAYER 1: CLIENTES / FRONTEND ================= -->
-      <div class="lg:col-span-5 flex flex-col gap-4">
-        <div class="flex items-center gap-2 pb-2 border-b border-slate-800">
-          <i data-lucide="monitor-smartphone" class="w-4 h-4 text-cyan-400"></i>
-          <span class="text-xs font-mono font-bold tracking-wider text-slate-300 uppercase">Capa 1: Clientes y Aplicaciones Satélite</span>
-        </div>
+      <!-- DIAGRAM GRID LAYOUT -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-20">
 
-        <!-- Unity Game Node -->
-        <div onclick="openDrawer('node-unity')" id="card-unity" class="arch-card p-5 rounded-2xl cursor-pointer relative group">
-          <div class="absolute -top-2.5 -right-2.5 px-2.5 py-0.5 bg-purple-950 border border-purple-500/50 text-purple-300 font-mono text-[10px] rounded-full">
-            PRIORIDAD 1
-          </div>
-          <div class="flex items-start gap-4">
-            <div class="p-3 bg-purple-500/10 rounded-xl border border-purple-500/30 text-purple-400 group-hover:scale-110 transition">
-              <i data-lucide="gamepad-2" class="w-6 h-6"></i>
+        <!-- ================= ROW 1: TOP SECTION ================= -->
+        
+        <!-- 1.1 Usuarios Jugadores -->
+        <div class="lg:col-span-2 flex flex-col justify-center">
+          <div id="node-users" onclick="selectNode('node-users', event)" class="arch-node p-5 rounded-2xl cursor-pointer group flex flex-col items-center text-center">
+            <div class="p-3.5 bg-blue-500/10 rounded-2xl border border-blue-500/30 text-blue-400 mb-3 group-hover:scale-110 transition">
+              <i data-lucide="users" class="w-8 h-8"></i>
             </div>
-            <div>
-              <h3 class="font-bold text-slate-100 flex items-center gap-2">
-                Juego Principal Unity
-                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-purple-400 transition"></i>
-              </h3>
-              <p class="text-xs text-slate-400 mt-1">Motor de juego con lógica local. Sincroniza estado global en la nube vía API.</p>
-              <div class="flex flex-wrap gap-1.5 mt-3">
-                <span class="px-2 py-0.5 text-[10px] font-mono bg-purple-900/30 text-purple-300 border border-purple-800/50 rounded">Acto I & II</span>
-                <span class="px-2 py-0.5 text-[10px] font-mono bg-slate-800 text-slate-300 rounded">C# / C standard JSON</span>
-                <span class="px-2 py-0.5 text-[10px] font-mono bg-cyan-950 text-cyan-400 rounded">Cloud Sync</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- PWA Node -->
-        <div onclick="openDrawer('node-pwa')" id="card-pwa" class="arch-card p-5 rounded-2xl cursor-pointer relative group">
-          <div class="absolute -top-2.5 -right-2.5 px-2.5 py-0.5 bg-emerald-950 border border-emerald-500/50 text-emerald-300 font-mono text-[10px] rounded-full">
-            PRIORIDAD 3
-          </div>
-          <div class="flex items-start gap-4">
-            <div class="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/30 text-emerald-400 group-hover:scale-110 transition">
-              <i data-lucide="globe" class="w-6 h-6"></i>
-            </div>
-            <div>
-              <h3 class="font-bold text-slate-100 flex items-center gap-2">
-                PWA: "Terminal de Lumen"
-                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition"></i>
-              </h3>
-              <p class="text-xs text-slate-400 mt-1">Compañera web del juego. Codex/Enciclopedia, mapa interactivo y modo offline.</p>
-              <div class="flex flex-wrap gap-1.5 mt-3">
-                <span class="px-2 py-0.5 text-[10px] font-mono bg-emerald-950 text-emerald-300 border border-emerald-800/50 rounded">Service Worker</span>
-                <span class="px-2 py-0.5 text-[10px] font-mono bg-slate-800 text-slate-300 rounded">Mapa Interactivo</span>
-                <span class="px-2 py-0.5 text-[10px] font-mono bg-slate-800 text-slate-300 rounded">Offline First</span>
-              </div>
+            <h3 class="font-bold text-sm text-slate-100">Usuarios Jugadores</h3>
+            <p class="text-[11px] text-slate-400 mt-1">Comunidad multi-dispositivo (PC, Web, Móvil)</p>
+            <div class="mt-3 pt-2 border-t border-slate-800/80 flex gap-2">
+              <i data-lucide="monitor" class="w-3.5 h-3.5 text-slate-400"></i>
+              <i data-lucide="smartphone" class="w-3.5 h-3.5 text-slate-400"></i>
+              <i data-lucide="globe" class="w-3.5 h-3.5 text-slate-400"></i>
             </div>
           </div>
         </div>
 
-        <!-- Mobile App Node -->
-        <div onclick="openDrawer('node-mobile')" id="card-mobile" class="arch-card p-5 rounded-2xl cursor-pointer relative group">
-          <div class="absolute -top-2.5 -right-2.5 px-2.5 py-0.5 bg-amber-950 border border-amber-500/50 text-amber-300 font-mono text-[10px] rounded-full">
-            PRIORIDAD 4
-          </div>
-          <div class="flex items-start gap-4">
-            <div class="p-3 bg-amber-500/10 rounded-xl border border-amber-500/30 text-amber-400 group-hover:scale-110 transition">
-              <i data-lucide="smartphone" class="w-6 h-6"></i>
-            </div>
-            <div>
-              <h3 class="font-bold text-slate-100 flex items-center gap-2">
-                App Móvil Compañera
-                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition"></i>
-              </h3>
-              <p class="text-xs text-slate-400 mt-1">Cliente móvil optimizado para consulta rápida de progreso y lore.</p>
-              <div class="flex flex-wrap gap-1.5 mt-3">
-                <span class="px-2 py-0.5 text-[10px] font-mono bg-amber-950 text-amber-300 border border-amber-800/50 rounded">React Native</span>
-                <span class="px-2 py-0.5 text-[10px] font-mono bg-slate-800 text-slate-300 rounded">Componentes Reutilizados</span>
-                <span class="px-2 py-0.5 text-[10px] font-mono bg-slate-800 text-slate-400 rounded">Opcional: WearOS (Compose)</span>
-              </div>
+        <!-- 1.2 Clientes (Frontends) Container -->
+        <div class="lg:col-span-7 rounded-2xl bg-slate-900/40 border border-slate-800/90 p-4">
+          <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800/80">
+            <div class="flex items-center gap-2">
+              <i data-lucide="layout-grid" class="w-4 h-4 text-cyan-400"></i>
+              <span class="text-xs font-bold tracking-wider uppercase text-slate-200">Clientes (Frontends) – Tres experiencias conectadas a Keycloak & API</span>
             </div>
           </div>
-        </div>
-
-      </div>
-
-      <!-- MIDDLE ANIMATED CONNECTIONS (DESKTOP) -->
-      <div class="hidden lg:flex lg:col-span-2 items-center justify-center relative">
-        <svg class="w-full h-full min-h-[380px]" viewBox="0 0 100 300" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="grad-cyan" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#a855f7" />
-              <stop offset="100%" stop-color="#3b82f6" />
-            </linearGradient>
-            <linearGradient id="grad-pwa" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#10b981" />
-              <stop offset="100%" stop-color="#3b82f6" />
-            </linearGradient>
-            <linearGradient id="grad-mobile" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#f59e0b" />
-              <stop offset="100%" stop-color="#3b82f6" />
-            </linearGradient>
-          </defs>
-
-          <!-- Unity to Backend Line -->
-          <path id="path-unity" d="M 0 55 C 50 55, 50 150, 100 150" fill="none" stroke="url(#grad-cyan)" stroke-width="2.5" class="flow-path glow-purple" />
           
-          <!-- PWA to Backend Line -->
-          <path id="path-pwa" d="M 0 150 L 100 150" fill="none" stroke="url(#grad-pwa)" stroke-width="2.5" class="flow-path glow-emerald" />
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <!-- Node Unity -->
+            <div id="node-unity" onclick="selectNode('node-unity', event)" class="arch-node p-4 rounded-xl cursor-pointer group">
+              <div class="flex items-center gap-2.5 mb-2">
+                <div class="p-2 bg-purple-500/10 rounded-lg text-purple-400 border border-purple-500/20">
+                  <i data-lucide="box" class="w-5 h-5"></i>
+                </div>
+                <h4 class="font-bold text-xs text-slate-100">Videojuego (Unity)</h4>
+              </div>
+              <ul class="text-[11px] text-slate-400 space-y-1 pl-1">
+                <li>• Auth Keycloak (JWT)</li>
+                <li>• Partidas en vivo & Puntuación</li>
+                <li>• Sincronización de logros</li>
+                <li>• Conexión WebSocket / REST</li>
+                <li>• Multiplataforma (PC/Mac/Linux)</li>
+              </ul>
+            </div>
 
-          <!-- Mobile to Backend Line -->
-          <path id="path-mobile" d="M 0 245 C 50 245, 50 150, 100 150" fill="none" stroke="url(#grad-mobile)" stroke-width="2.5" class="flow-path glow-amber" />
-        </svg>
-      </div>
+            <!-- Node PWA -->
+            <div id="node-pwa" onclick="selectNode('node-pwa', event)" class="arch-node p-4 rounded-xl cursor-pointer group">
+              <div class="flex items-center gap-2.5 mb-2">
+                <div class="p-2 bg-emerald-500/10 rounded-lg text-emerald-400 border border-emerald-500/20">
+                  <i data-lucide="chrome" class="w-5 h-5"></i>
+                </div>
+                <h4 class="font-bold text-xs text-slate-100">PWA - Tablero (React)</h4>
+              </div>
+              <ul class="text-[11px] text-slate-400 space-y-1 pl-1">
+                <li>• Auth Keycloak OIDC / SSO</li>
+                <li>• Leaderboards globales</li>
+                <li>• Perfil y estadísticas públicas</li>
+                <li>• Service Workers (Offline)</li>
+                <li>• Instalable en Navegador</li>
+              </ul>
+            </div>
 
-      <!-- ================= LAYER 2 & 3: API & BACKEND ================= -->
-      <div class="lg:col-span-5 flex flex-col gap-4">
-        <div class="flex items-center gap-2 pb-2 border-b border-slate-800">
-          <i data-lucide="server" class="w-4 h-4 text-blue-400"></i>
-          <span class="text-xs font-mono font-bold tracking-wider text-slate-300 uppercase">Capa 2 & 3: Capa de Datos Compartida (API Central)</span>
+            <!-- Node Flutter -->
+            <div id="node-flutter" onclick="selectNode('node-flutter', event)" class="arch-node p-4 rounded-xl cursor-pointer group">
+              <div class="flex items-center gap-2.5 mb-2">
+                <div class="p-2 bg-amber-500/10 rounded-lg text-amber-400 border border-amber-500/20">
+                  <i data-lucide="smartphone" class="w-5 h-5"></i>
+                </div>
+                <h4 class="font-bold text-xs text-slate-100">App Móvil (Flutter)</h4>
+              </div>
+              <ul class="text-[11px] text-slate-400 space-y-1 pl-1">
+                <li>• Auth Keycloak (OAuth PKCE)</li>
+                <li>• Notificaciones Push (FCM)</li>
+                <li>• Historial y medallas</li>
+                <li>• Red social / Amigos</li>
+                <li>• Android & iOS</li>
+              </ul>
+            </div>
+          </div>
         </div>
 
-        <!-- Central API Card -->
-        <div onclick="openDrawer('node-api')" id="card-api" class="arch-card p-6 rounded-2xl cursor-pointer relative group border-blue-500/30">
-          <div class="absolute -top-2.5 -right-2.5 px-2.5 py-0.5 bg-blue-950 border border-blue-500/50 text-blue-300 font-mono text-[10px] rounded-full">
-            PRIORIDAD 2
-          </div>
-          <div class="flex items-start gap-4">
-            <div class="p-3.5 bg-blue-500/10 rounded-xl border border-blue-500/30 text-blue-400 group-hover:scale-110 transition">
-              <i data-lucide="network" class="w-7 h-7"></i>
-            </div>
+        <!-- 1.3 Proveedor de Identidad (IdP) -->
+        <div class="lg:col-span-3">
+          <div id="node-keycloak" onclick="selectNode('node-keycloak', event)" class="arch-node p-5 rounded-2xl cursor-pointer group h-full flex flex-col justify-between">
             <div>
-              <h3 class="text-lg font-bold text-slate-100 flex items-center gap-2">
-                API Central Ligera
-                <i data-lucide="chevron-right" class="w-5 h-5 text-slate-500 group-hover:text-blue-400 transition"></i>
-              </h3>
-              <p class="text-xs text-slate-300 mt-1">Fuente Única de Verdad (Single Source of Truth). Gestiona el estado y la enciclopedia del universo del juego.</p>
-              
-              <!-- Sub-modules of Central API -->
-              <div class="grid grid-cols-2 gap-2 mt-4">
-                <div class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
-                  <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
-                    <i data-lucide="book-open" class="w-3.5 h-3.5 text-cyan-400"></i>
-                    Codex & Lore
-                  </div>
-                  <p class="text-[11px] text-slate-400 mt-0.5">Bestiario de Robots, Personajes y Archivos de Memoria.</p>
+              <div class="flex items-center gap-2.5 mb-3">
+                <div class="p-2.5 bg-indigo-500/10 rounded-xl text-indigo-400 border border-indigo-500/30">
+                  <i data-lucide="shield-check" class="w-6 h-6"></i>
                 </div>
-                <div class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
-                  <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
-                    <i data-lucide="trophy" class="w-3.5 h-3.5 text-amber-400"></i>
-                    Progreso & Logros
-                  </div>
-                  <p class="text-[11px] text-slate-400 mt-0.5">Estado del jugador, fragmentos desbloqueados y medallas.</p>
-                </div>
-                <div class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
-                  <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
-                    <i data-lucide="key-round" class="w-3.5 h-3.5 text-emerald-400"></i>
-                    Auth Simplicada
-                  </div>
-                  <p class="text-[11px] text-slate-400 mt-0.5">Cuentas de usuario o modo Invitado rápido.</p>
-                </div>
-                <div class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800">
-                  <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
-                    <i data-lucide="file-json" class="w-3.5 h-3.5 text-purple-400"></i>
-                    REST / GraphQL
-                  </div>
-                  <p class="text-[11px] text-slate-400 mt-0.5">Intercambio estándar en formato JSON.</p>
+                <div>
+                  <span class="text-[10px] font-mono text-indigo-400 uppercase tracking-wider">Proveedor Identidad</span>
+                  <h3 class="font-bold text-sm text-slate-100">KEYCLOAK (IdP)</h3>
                 </div>
               </div>
+              <ul class="text-[11px] text-slate-400 space-y-1.5 border-t border-slate-800/80 pt-2.5">
+                <li class="flex items-center gap-1.5"><i data-lucide="check-circle-2" class="w-3 h-3 text-indigo-400"></i> SSO para Unity, PWA y Flutter</li>
+                <li class="flex items-center gap-1.5"><i data-lucide="check-circle-2" class="w-3 h-3 text-indigo-400"></i> OAuth 2.0 / OIDC / PKCE</li>
+                <li class="flex items-center gap-1.5"><i data-lucide="check-circle-2" class="w-3 h-3 text-indigo-400"></i> Gestión de usuarios & roles</li>
+                <li class="flex items-center gap-1.5"><i data-lucide="check-circle-2" class="w-3 h-3 text-indigo-400"></i> Emisión de JWT / Endpoint JWKS</li>
+              </ul>
+            </div>
+            <div class="mt-3 pt-2 border-t border-slate-800/80 text-[10px] font-mono text-slate-500">
+              Protocol: OpenID Connect 1.0
+            </div>
+          </div>
+        </div>
 
-              <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-slate-400">
-                <span>Stack sugerido:</span>
-                <span class="text-cyan-300">Firebase / Supabase (Setup Rápido) ó Node+Express</span>
+        <!-- ================= ROW 2: MIDDLE SECTION ================= -->
+
+        <!-- 2.1 Servicios Externos -->
+        <div class="lg:col-span-3">
+          <div id="node-external" onclick="selectNode('node-external', event)" class="arch-node p-5 rounded-2xl cursor-pointer group h-full">
+            <div class="flex items-center gap-2.5 mb-3">
+              <div class="p-2.5 bg-slate-800 rounded-xl text-slate-300 border border-slate-700">
+                <i data-lucide="cloud-cog" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-sm text-slate-100">Servicios Externos</h3>
+                <span class="text-[10px] font-mono text-slate-400">(Integraciones SaaS)</span>
+              </div>
+            </div>
+            <div class="space-y-2 text-[11px] text-slate-400 border-t border-slate-800/80 pt-2.5">
+              <div>
+                <span class="font-semibold text-slate-200">✉️ Correo:</span> SendGrid (Confirmaciones)
+              </div>
+              <div>
+                <span class="font-semibold text-slate-200">☁️ S3 Storage:</span> Avatares & Media
+              </div>
+              <div>
+                <span class="font-semibold text-slate-200">💬 Push Messaging:</span> Firebase FCM (Flutter)
+              </div>
+              <div>
+                <span class="font-semibold text-slate-200">📊 Telemetría:</span> Google Analytics / Firebase
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Database Storage Card -->
-        <div onclick="openDrawer('node-db')" id="card-db" class="arch-card p-4 rounded-2xl cursor-pointer relative group">
-          <div class="flex items-center gap-3">
-            <div class="p-2.5 bg-slate-800 rounded-xl text-slate-300 border border-slate-700 group-hover:text-cyan-400 transition">
-              <i data-lucide="database" class="w-5 h-5"></i>
+        <!-- 2.2 API Propia (Backend Central) -->
+        <div class="lg:col-span-6">
+          <div id="node-api" onclick="selectNode('node-api', event)" class="arch-node p-6 rounded-2xl cursor-pointer group relative border-cyan-500/30">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-3">
+                <div class="p-3 bg-cyan-500/10 rounded-2xl text-cyan-400 border border-cyan-500/30">
+                  <i data-lucide="server" class="w-7 h-7"></i>
+                </div>
+                <div>
+                  <span class="text-[10px] font-mono text-cyan-400 uppercase tracking-widest">Capa Central de Negocio</span>
+                  <h3 class="font-bold text-base text-slate-100">API Propia (Backend Central)</h3>
+                  <p class="text-xs text-slate-400">Node.js + Express  ó  FastAPI + Python</p>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 bg-cyan-950 text-cyan-300 border border-cyan-800 rounded-full font-mono text-[10px]">REST / JSON / WSS</span>
             </div>
-            <div class="flex-grow">
-              <h4 class="font-semibold text-sm text-slate-200">Base de Datos / Storage de Contenido</h4>
-              <p class="text-xs text-slate-400">Persistencia de coleccionables, coordenadas del mapa y perfiles.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-slate-300">
+              <ul class="space-y-1">
+                <li>• Endpoints unificados (Unity / PWA / Flutter)</li>
+                <li>• Validaciones de Token JWT (Keycloak JWKS)</li>
+                <li>• Lógica de partidas, puntajes y perfil</li>
+              </ul>
+              <ul class="space-y-1">
+                <li>• Gestión de notificaciones Push (App Móvil)</li>
+                <li>• WebSockets para tiempo real (Videojuego)</li>
+                <li>• Documentación Swagger / OpenAPI</li>
+              </ul>
             </div>
-            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
           </div>
         </div>
 
-      </div>
+        <!-- 2.3 Monitoreo y Logs -->
+        <div class="lg:col-span-3">
+          <div id="node-monitoring" onclick="selectNode('node-monitoring', event)" class="arch-node p-5 rounded-2xl cursor-pointer group h-full">
+            <div class="flex items-center gap-2.5 mb-3">
+              <div class="p-2.5 bg-orange-500/10 rounded-xl text-orange-400 border border-orange-500/30">
+                <i data-lucide="activity" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-sm text-slate-100">Monitoreo y Logs</h3>
+                <span class="text-[10px] font-mono text-orange-400">Observabilidad</span>
+              </div>
+            </div>
+            <ul class="text-[11px] text-slate-400 space-y-1.5 border-t border-slate-800/80 pt-2.5">
+              <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-orange-400"></span> Grafana (Dashboards)</li>
+              <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-400"></span> Prometheus (Métricas)</li>
+              <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-yellow-400"></span> Loki (Logs)</li>
+              <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Alertas de disponibilidad</li>
+            </ul>
+          </div>
+        </div>
 
-    </div>
+        <!-- ================= ROW 3: BOTTOM SECTION ================= -->
 
-    <!-- ROADMAP / TIMELINE SECTION -->
-    <div class="mt-6 p-6 rounded-2xl bg-slate-950/60 border border-slate-800">
-      <div class="flex items-center gap-2 mb-4">
-        <i data-lucide="calendar" class="w-5 h-5 text-cyan-400"></i>
-        <h3 class="font-bold text-slate-100">Cronograma Sugerido de 2 Meses</h3>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="p-4 rounded-xl bg-purple-950/20 border border-purple-500/30">
-          <span class="text-xs font-mono font-bold text-purple-400">Fase 1 (Semanas 1-3)</span>
-          <h4 class="font-semibold text-sm text-slate-200 mt-1">Juego Unity Acto I y II</h4>
-          <p class="text-xs text-slate-400 mt-1">Completar gameplay principal. Dejar preparado conector HTTP REST para API.</p>
+        <!-- 3.1 Infraestructura / Despliegue -->
+        <div class="lg:col-span-3">
+          <div id="node-infra" onclick="selectNode('node-infra', event)" class="arch-node p-5 rounded-2xl cursor-pointer group h-full">
+            <div class="flex items-center gap-2.5 mb-3">
+              <div class="p-2.5 bg-teal-500/10 rounded-xl text-teal-400 border border-teal-500/30">
+                <i data-lucide="container" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-sm text-slate-100">Infraestructura</h3>
+                <span class="text-[10px] font-mono text-teal-400">Despliegue Cloud</span>
+              </div>
+            </div>
+            <ul class="text-[11px] text-slate-400 space-y-1.5 border-t border-slate-800/80 pt-2.5">
+              <li class="flex items-center gap-2"><i data-lucide="box" class="w-3.5 h-3.5 text-teal-400"></i> Contenedores (Docker)</li>
+              <li class="flex items-center gap-2"><i data-lucide="network" class="w-3.5 h-3.5 text-teal-400"></i> Orquestación (K8s / Compose)</li>
+              <li class="flex items-center gap-2"><i data-lucide="cloud" class="w-3.5 h-3.5 text-teal-400"></i> Cloud (AWS / Azure / GCP)</li>
+            </ul>
+          </div>
         </div>
-        <div class="p-4 rounded-xl bg-cyan-950/20 border border-cyan-500/30">
-          <span class="text-xs font-mono font-bold text-cyan-400">Fase 2 (Semanas 3-5)</span>
-          <h4 class="font-semibold text-sm text-slate-200 mt-1">API Central Mínima</h4>
-          <p class="text-xs text-slate-400 mt-1">Endpoints de Auth invitado + CRUD del Codex de Robots + Endpoint de Progreso.</p>
+
+        <!-- 3.2 Capa de Datos -->
+        <div class="lg:col-span-6 rounded-2xl bg-slate-900/40 border border-slate-800/90 p-4">
+          <div class="flex items-center justify-between pb-2 mb-3 border-b border-slate-800/80">
+            <div class="flex items-center gap-2">
+              <i data-lucide="database" class="w-4 h-4 text-pink-400"></i>
+              <span class="text-xs font-bold tracking-wider uppercase text-slate-200">Capa de Datos Persistente & Caché</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <!-- Node SQL -->
+            <div id="node-sqldb" onclick="selectNode('node-sqldb', event)" class="arch-node p-3.5 rounded-xl cursor-pointer group">
+              <div class="flex items-center gap-2 mb-2 text-blue-400">
+                <i data-lucide="database" class="w-4 h-4"></i>
+                <h4 class="font-bold text-xs text-slate-100">BD Relacional</h4>
+              </div>
+              <span class="text-[10px] font-mono text-slate-400 block mb-1">MySQL / PostgreSQL</span>
+              <ul class="text-[11px] text-slate-400 space-y-0.5">
+                <li>• Usuarios & Perfiles</li>
+                <li>• Partidas y puntuaciones</li>
+                <li>• Logros e Inventario</li>
+              </ul>
+            </div>
+
+            <!-- Node NoSQL -->
+            <div id="node-nosqldb" onclick="selectNode('node-nosqldb', event)" class="arch-node p-3.5 rounded-xl cursor-pointer group">
+              <div class="flex items-center gap-2 mb-2 text-emerald-400">
+                <i data-lucide="file-json" class="w-4 h-4"></i>
+                <h4 class="font-bold text-xs text-slate-100">BD NoSQL</h4>
+              </div>
+              <span class="text-[10px] font-mono text-slate-400 block mb-1">MongoDB</span>
+              <ul class="text-[11px] text-slate-400 space-y-0.5">
+                <li>• Eventos de juego</li>
+                <li>• Logs y Telemetría</li>
+                <li>• Datos no estructurados</li>
+              </ul>
+            </div>
+
+            <!-- Node Redis -->
+            <div id="node-redis" onclick="selectNode('node-redis', event)" class="arch-node p-3.5 rounded-xl cursor-pointer group">
+              <div class="flex items-center gap-2 mb-2 text-red-400">
+                <i data-lucide="zap" class="w-4 h-4"></i>
+                <h4 class="font-bold text-xs text-slate-100">Caché / Sesiones</h4>
+              </div>
+              <span class="text-[10px] font-mono text-slate-400 block mb-1">Redis</span>
+              <ul class="text-[11px] text-slate-400 space-y-0.5">
+                <li>• Sesiones activas</li>
+                <li>• Leaderboards en memoria</li>
+                <li>• Rate limiting</li>
+              </ul>
+            </div>
+          </div>
         </div>
-        <div class="p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/30">
-          <span class="text-xs font-mono font-bold text-emerald-400">Fase 3 (Semanas 5-7)</span>
-          <h4 class="font-semibold text-sm text-slate-200 mt-1">PWA Terminal de Lumen</h4>
-          <p class="text-xs text-slate-400 mt-1">UI navegable de lore, mapa de la ciudad y Service Worker para uso offline.</p>
+
+        <!-- 3.3 Características Clave -->
+        <div class="lg:col-span-3">
+          <div class="arch-node p-5 rounded-2xl h-full border-slate-800 bg-slate-900/30">
+            <div class="flex items-center gap-2 mb-3">
+              <i data-lucide="sparkles" class="w-4 h-4 text-cyan-400"></i>
+              <h3 class="font-bold text-xs text-slate-200 uppercase tracking-wider">Ventajas de Integración</h3>
+            </div>
+            <ul class="text-[11px] text-slate-300 space-y-2">
+              <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyan-400 shrink-0"></i> Single Sign-On (SSO) con Keycloak</li>
+              <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyan-400 shrink-0"></i> Mismo Backend REST para Unity, PWA y Flutter</li>
+              <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyan-400 shrink-0"></i> Notificaciones Push directas a smartphones</li>
+              <li class="flex items-start gap-2"><i data-lucide="check" class="w-4 h-4 text-cyan-400 shrink-0"></i> PWA disponible e instalable desde la Web</li>
+            </ul>
+          </div>
         </div>
-        <div class="p-4 rounded-xl bg-amber-950/20 border border-amber-500/30">
-          <span class="text-xs font-mono font-bold text-amber-400">Fase 4 (Semanas 7-8)</span>
-          <h4 class="font-semibold text-sm text-slate-200 mt-1">App Móvil React Native</h4>
-          <p class="text-xs text-slate-400 mt-1">Consumo de la misma API, testing multiplataforma (+ WearOS opcional).</p>
-        </div>
+
       </div>
     </div>
 
   </main>
 
-  <!-- Footer -->
-  <footer class="border-t border-slate-800/80 bg-slate-950 py-4 text-center text-xs text-slate-500">
-    <p>Proyecto Universitario Lumen — Diseñado para desplegar directamente en GitHub Pages.</p>
-  </footer>
-
-  <!-- DETAIL DRAWER (SLIDE OVER) -->
+  <!-- SIDE DRAWER FOR DETAILED INFORMATION -->
   <div id="drawer-backdrop" onclick="closeDrawer()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden transition-opacity"></div>
-  
-  <div id="drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-slate-900 border-l border-slate-800 z-50 p-6 overflow-y-auto drawer drawer-closed shadow-2xl flex flex-col justify-between">
+
+  <div id="drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-slate-900 border-l border-slate-800 z-50 p-6 overflow-y-auto drawer-transition drawer-closed shadow-2xl flex flex-col justify-between">
     <div>
+      <!-- Drawer Header -->
       <div class="flex items-center justify-between pb-4 border-b border-slate-800">
-        <div class="flex items-center gap-2">
-          <span id="drawer-icon" class="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"></span>
-          <h3 id="drawer-title" class="font-bold text-lg text-white">Detalle del Componente</h3>
+        <div class="flex items-center gap-3">
+          <div id="drawer-badge-icon" class="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+            <i data-lucide="info" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <span id="drawer-category" class="text-[10px] font-mono uppercase tracking-widest text-cyan-400">Detalles</span>
+            <h3 id="drawer-title" class="font-bold text-base text-white">Componente Seleccionado</h3>
+          </div>
         </div>
-        <button onclick="closeDrawer()" class="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white">
+        <button onclick="closeDrawer()" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <div class="mt-6 flex flex-col gap-4">
+      <!-- Drawer Dynamic Body -->
+      <div class="mt-5 space-y-5 text-xs text-slate-300">
+        <!-- Description -->
         <div>
-          <span class="text-[11px] font-mono text-slate-500 uppercase tracking-wider">Descripción Tecnológica</span>
-          <p id="drawer-desc" class="text-sm text-slate-300 mt-1 leading-relaxed"></p>
+          <span class="text-[10px] font-mono uppercase tracking-wider text-slate-500 block mb-1">Descripción de Rol</span>
+          <p id="drawer-desc" class="text-slate-300 leading-relaxed bg-slate-950/60 p-3 rounded-xl border border-slate-800/80"></p>
         </div>
 
-        <div>
-          <span class="text-[11px] font-mono text-slate-500 uppercase tracking-wider">Responsabilidad Principal</span>
-          <ul id="drawer-responsibilities" class="mt-2 space-y-2 text-xs text-slate-300"></ul>
+        <!-- Dynamic KV Section 1 -->
+        <div id="drawer-section-1">
+          <span id="drawer-s1-title" class="text-[10px] font-mono uppercase tracking-wider text-slate-500 block mb-1">Tecnologías / Protocolos</span>
+          <div id="drawer-s1-content" class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80 font-mono text-[11px] text-cyan-300"></div>
         </div>
 
-        <div>
-          <span class="text-[11px] font-mono text-slate-500 uppercase tracking-wider">Intercambio de Datos / JSON Endpoints</span>
-          <div id="drawer-endpoints" class="mt-2 p-3 rounded-lg bg-slate-950 font-mono text-xs text-cyan-300 border border-slate-800 overflow-x-auto"></div>
+        <!-- Dynamic KV Section 2 -->
+        <div id="drawer-section-2">
+          <span id="drawer-s2-title" class="text-[10px] font-mono uppercase tracking-wider text-slate-500 block mb-1">Responsabilidades / Flujo</span>
+          <ul id="drawer-s2-content" class="space-y-1.5 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80"></ul>
+        </div>
+
+        <!-- Dynamic Endpoint / Payload Box -->
+        <div id="drawer-section-3">
+          <span id="drawer-s3-title" class="text-[10px] font-mono uppercase tracking-wider text-slate-500 block mb-1">Intercambio de Datos / Payload</span>
+          <pre id="drawer-s3-content" class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-cyan-300 font-mono text-[11px] overflow-x-auto whitespace-pre-wrap"></pre>
         </div>
       </div>
     </div>
 
-    <div class="pt-6 border-t border-slate-800 mt-6">
-      <button onclick="closeDrawer()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition">
-        Cerrar Panel
+    <!-- Drawer Footer -->
+    <div class="pt-4 border-t border-slate-800 mt-6 flex items-center gap-2">
+      <button onclick="resetSelection()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition">
+        Cerrar & Ver Diagrama
       </button>
     </div>
   </div>
 
-  <!-- JavaScript for Interactions -->
   <script>
-    // Initialize Lucide Icons
+    /* Initialize Lucide Icons */
     lucide.createIcons();
 
-    // Node Data details for Drawer
-    const nodeDetails = {
-      'node-unity': {
-        title: 'Juego Principal Unity',
-        icon: 'gamepad-2',
-        color: 'text-purple-400',
-        desc: 'El núcleo jugable desarrollado en Unity para los Actos I y II. La lógica del juego (físicas, combate, niveles) corre localmente para no depender de latencia de red.',
+    /* ================= DATA STRUCTURES ================= */
+
+    const nodesData = {
+      'node-users': {
+        title: 'Usuarios / Jugadores',
+        category: 'Cliente Humano',
+        icon: 'users',
+        desc: 'Los jugadores interactúan desde diversos dispositivos (PC, smartphones, navegadores web) compartiendo una sola identidad unificada.',
+        tech: 'Dispositivos de escritorio, Móviles Android/iOS, Navegadores Web',
         responsibilities: [
-          '🎮 Renderizado del juego e interactividad del Acto I y II.',
-          '💾 Generación de guardados locales y eventos de progreso.',
-          '☁️ Envío asíncrono de avances (logros, robots descubiertos) a la API Central en JSON.',
-          '🔄 Consumo de la API para restaurar progreso si el usuario cambia de dispositivo.'
+          'Jugar partidas en directo con Unity Engine.',
+          'Revisar el tablero global e historial en la PWA.',
+          'Recibir notificaciones y conectar con amigos desde la App Móvil.'
         ],
-        endpoints: `POST /api/v1/sync/progress\nGET  /api/v1/user/profile\nPOST /api/v1/achievements/unlock`
+        payload: `Eventos de entrada -> Unity / PWA / App Móvil`
+      },
+      'node-unity': {
+        title: 'Videojuego (Unity Engine)',
+        category: 'Cliente Frontend Principal',
+        icon: 'box',
+        desc: 'Cliente principal ejecutable enfocado en rendimiento gráfico, mecánicas jugables y combate en tiempo real.',
+        tech: 'Unity C#, UnityWebRequest, WebSockets, OAuth2',
+        responsibilities: [
+          'Renderizado e interfaz gráfica del bucle del juego.',
+          'Solicitud de tokens JWT a Keycloak para autenticación.',
+          'Envío de puntuaciones y partidas a la API Central.',
+          'Conexión por WebSockets para el modo multijugador.'
+        ],
+        payload: `POST /api/v1/game/scores\nHeader: Authorization: Bearer <JWT>\nBody: { "score": 14250, "duration": 180 }`
       },
       'node-pwa': {
-        title: 'PWA: Terminal de Lumen',
-        icon: 'globe',
-        color: 'text-emerald-400',
-        desc: 'Aplicación Web Progresiva instalable que actúa como codex/terminal complementario. Permite consultar lore y mapa fuera del juego.',
+        title: 'PWA - Tablero de Posiciones',
+        category: 'Cliente Web Satélite',
+        icon: 'chrome',
+        desc: 'Aplicación Web Progresiva en React+Vite. Permite consultar rankings globales y estadísticas sin necesidad de abrir el ejecutable del juego.',
+        tech: 'React, Vite, Tailwind CSS, Service Workers, OpenID Connect',
         responsibilities: [
-          '📖 Enciclopedia/Codex navegable de robots, personajes y lore.',
-          '🗺️ Mapa interactivo de la ciudad con marcadores de coleccionables.',
-          '📶 Cacheo inteligente vía Service Workers para permitir lectura sin conexión a internet.',
-          '📱 Instalable en pantalla de inicio en Android/iOS/Desktop sin tienda.'
+          'Autenticación mediante Keycloak SSO (Single Sign-On).',
+          'Visualización interactiva de posiciones globales y de amigos.',
+          'Soporte offline mediante Service Workers e instalabilidad.',
+          'Edición de perfil público de jugador.'
         ],
-        endpoints: `GET /api/v1/codex/robots\nGET /api/v1/map/points-of-interest\nGET /api/v1/user/memories`
+        payload: `GET /api/v1/leaderboard/global?page=1&limit=50\nHeader: Authorization: Bearer <JWT_OIDC>`
       },
-      'node-mobile': {
-        title: 'App Móvil Compañera',
+      'node-flutter': {
+        title: 'App Móvil (Flutter)',
+        category: 'Cliente Móvil Companion',
         icon: 'smartphone',
-        color: 'text-amber-400',
-        desc: 'Cliente alternativo desarrollado en React Native para consulta ultrarrápida en smartphones. Reutiliza componentes UI/lógica de la PWA.',
+        desc: 'Aplicación nativa iOS/Android orientada a interacción social rápida, notificaciones push inmediatas y seguimiento de progreso.',
+        tech: 'Flutter, Dart, Firebase Cloud Messaging (FCM), OAuth PKCE',
         responsibilities: [
-          '⚡ Dashboard táctil rápido para ver logros e inventario de lore.',
-          '♻️ Reutilización de estilos y modelos TypeScript del backend/PWA.',
-          '⌚ Extendible opcionalmente a relojes WearOS usando Jetpack Compose para alertas o resúmenes.'
+          'Autenticación segura con Keycloak mediante flujo OAuth 2.0 PKCE.',
+          'Registro del Token FCM para recibir notificaciones cuando alguien rompa tu récord.',
+          'Consulta de historial de partidas y medallas del usuario.',
+          'Gestión de lista de amigos y feed de actividades.'
         ],
-        endpoints: `GET /api/v1/user/summary\nGET /api/v1/codex/quick-search`
+        payload: `POST /api/v1/device/register-push\nBody: { "fcmToken": "bk3RNw8e...", "platform": "android" }`
+      },
+      'node-keycloak': {
+        title: 'Keycloak (Proveedor de Identidad)',
+        category: 'IAM / Identidad',
+        icon: 'shield-check',
+        desc: 'Servidor centralizado de gestión de identidades (IdP). Implementa SSO para que el mismo usuario ingrese en Unity, PWA y Flutter.',
+        tech: 'OAuth 2.0, OpenID Connect (OIDC), PKCE, JWT Tokens, JWKS',
+        responsibilities: [
+          'Autenticación unificada para Unity, PWA y la App Móvil.',
+          'Gestión de roles, permisos y credenciales de usuario.',
+          'Firma de tokens de acceso JWT y exposición de llaves públicas JWKS.'
+        ],
+        payload: `POST /realms/gamehub/protocol/openid-connect/token\nGrant Types: authorization_code / password / PKCE`
+      },
+      'node-external': {
+        title: 'Servicios Externos',
+        category: 'Integraciones Cloud',
+        icon: 'cloud-cog',
+        desc: 'Plataformas SaaS consumidas por el backend para delegar almacenamiento masivo, notificaciones push y envíos de correo.',
+        tech: 'AWS S3, SendGrid REST API, Firebase FCM API',
+        responsibilities: [
+          'Envío de notificaciones push a la App Móvil Flutter vía FCM.',
+          'Almacenamiento de avatares en buckets S3.',
+          'Envío de correos de bienvenida o restablecimiento con SendGrid.'
+        ],
+        payload: `POST https://fcm.googleapis.com/fcm/send\nAuthorization: key=SERVER_KEY`
       },
       'node-api': {
-        title: 'API Central Ligera',
-        icon: 'network',
-        color: 'text-blue-400',
-        desc: 'Capa de backend que desacopla la lógica del juego de la presentación de los datos. Garantiza una Única Fuente de Verdad (Single Source of Truth).',
+        title: 'API Central (Backend)',
+        icon: 'server',
+        category: 'Capa Lógica de Negocio',
+        desc: 'Backend centralizado (Node.js/Express o Python FastAPI) que expone servicios unificados para todos los clientes.',
+        tech: 'Node.js Express / Python FastAPI, JSON REST, WebSockets, Swagger',
         responsibilities: [
-          '🔑 Autenticación liviana (Usuario registrado o Token de Invitado rápido).',
-          '📦 Servicio de datos estructurados en formato REST o GraphQL.',
-          '🛡️ Validación de logros y almacenamiento de los fragmentos de memoria desbloqueados.',
-          '⚡ Recomendación: Usar Firebase/Supabase para ahorrarse la infraestructura inicial.'
+          'Validación de tokens JWT recibidos contra el endpoint JWKS de Keycloak.',
+          'Lógica de negocio: validación de puntajes, actualización de leaderboard.',
+          'Recepción de FCM tokens desde Flutter y dispatch de alertas.',
+          'Orquestación entre PostgreSQL, MongoDB y Redis.'
         ],
-        endpoints: `POST /api/v1/auth/guest\nGET  /api/v1/codex/all\nPUT  /api/v1/player/progress`
+        payload: `Validates Header: Authorization: Bearer <Token>\nRoutes: /api/v1/game, /api/v1/leaderboard, /api/v1/user`
       },
-      'node-db': {
-        title: 'Base de Datos y Persistencia',
-        icon: 'database',
-        color: 'text-slate-300',
-        desc: 'Almacenamiento persistente del contenido global y de los estados de los jugadores.',
+      'node-monitoring': {
+        title: 'Monitoreo y Logs (Grafana Stack)',
+        category: 'Observabilidad',
+        icon: 'activity',
+        desc: 'Ecosistema de monitoreo de métricas, rendimiento y trazabilidad de errores en tiempo real.',
+        tech: 'Grafana, Prometheus, Loki, Alertmanager',
         responsibilities: [
-          '📄 Colecciones de datos estáticos (Codex de robots, descripciones, imágenes).',
-          '👤 Tablas/Documentos de usuarios, partidas guardadas y progreso.',
-          '📍 Coordenadas y metadatos del mapa de la ciudad.'
+          'Recolección de métricas de CPU, memoria y peticiones HTTP por segundo.',
+          'Indexación de logs de errores centralizados.',
+          'Envío de alertas automáticas ante caídas del servicio.'
         ],
-        endpoints: `PostgreSQL / Firestore NoSQL DB Structure`
+        payload: `GET /metrics (Prometheus Format)`
+      },
+      'node-sqldb': {
+        title: 'BD Relacional (MySQL / PostgreSQL)',
+        category: 'Persistencia Estructurada',
+        icon: 'database',
+        desc: 'Base de datos relacional principal para datos estructurados con consistencia ACID.',
+        tech: 'PostgreSQL / MySQL, TypeORM / Prisma ORM',
+        responsibilities: [
+          'Perfiles de usuarios y listas de amigos.',
+          'Historial oficial de partidas e inventarios.',
+          'Tabla maestra de posiciones e insignias.'
+        ],
+        payload: `SELECT * FROM scores ORDER BY score DESC LIMIT 10;`
+      },
+      'node-nosqldb': {
+        title: 'BD NoSQL (MongoDB)',
+        category: 'Persistencia No Estructurada',
+        icon: 'file-json',
+        desc: 'Base de datos orientada a documentos para alta ingesta de eventos por segundo.',
+        tech: 'MongoDB, BSON Format',
+        responsibilities: [
+          'Logs de auditoría y telemetría de juego.',
+          'Eventos detallados de partidas para analítica.',
+          'Configuraciones dinámicas de eventos.'
+        ],
+        payload: `db.telemetry.insertOne({ event: 'level_complete', userId: 'usr_123' })`
+      },
+      'node-redis': {
+        title: 'Caché / Sesiones (Redis)',
+        category: 'In-Memory Data Store',
+        icon: 'zap',
+        desc: 'Almacenamiento en memoria RAM de ultra baja latencia (<1ms) para agilizar lecturas frecuentes.',
+        tech: 'Redis Store, RESP Protocol',
+        responsibilities: [
+          'Caché de tablas de posiciones para responder velozmente a PWA y Móvil.',
+          'Gestión de rate limiting para prevenir spam de peticiones.',
+          'Almacenamiento de estado de sesiones temporales.'
+        ],
+        payload: `ZADD leaderboard:global 14250 "player_123"`
+      },
+      'node-infra': {
+        title: 'Infraestructura & Despliegue',
+        category: 'DevOps / Cloud',
+        icon: 'container',
+        desc: 'Despliegue automatizado en la nube mediante contenedores aislados.',
+        tech: 'Docker, Kubernetes, AWS / Azure / GCP',
+        responsibilities: [
+          'Empaquetado de la API y Keycloak en contenedores Docker.',
+          'Escalado horizontal dinámico según el tráfico de usuarios.',
+          'Gestión de redes internas privadas para bases de datos.'
+        ],
+        payload: `docker-compose up -d --scale api=3`
       }
     };
 
-    // Open Drawer Function
-    function openDrawer(nodeId) {
-      const data = nodeDetails[nodeId];
+    // Connections array explicitly detailing interactions for Unity, PWA and Flutter Mobile
+    const connectionsData = [
+      // 1. Users to Frontends
+      {
+        id: 'conn-users-unity',
+        from: 'node-users',
+        to: 'node-unity',
+        label: 'Juego (PC / Consola)',
+        category: ['auth', 'gameplay'],
+        details: {
+          origin: 'Usuarios Jugadores',
+          destination: 'Videojuego (Unity)',
+          direction: 'Unidireccional (Inputs de control)',
+          protocol: 'UI Interactions / Gamepad / Teclado',
+          endpoint: 'Ejecutable Local (Unity Engine)',
+          format: 'Eventos DirectInput / Input System',
+          desc: 'Los jugadores ejecutan el juego, participan en partidas y compiten en tiempo real.'
+        }
+      },
+      {
+        id: 'conn-users-pwa',
+        from: 'node-users',
+        to: 'node-pwa',
+        label: 'Acceso Web (PWA)',
+        category: ['auth', 'gameplay'],
+        details: {
+          origin: 'Usuarios Jugadores',
+          destination: 'PWA - Tablero (React)',
+          direction: 'Unidireccional (Navegador)',
+          protocol: 'HTTPS Web UI',
+          endpoint: 'Navegador Web / App Instalable',
+          format: 'Eventos DOM / Touch / Click',
+          desc: 'Los jugadores consultan desde la web la tabla de posiciones global, perfiles públicos y noticias del juego.'
+        }
+      },
+      {
+        id: 'conn-users-flutter',
+        from: 'node-users',
+        to: 'node-flutter',
+        label: 'App Móvil (Smartphone)',
+        category: ['auth', 'gameplay'],
+        details: {
+          origin: 'Usuarios Jugadores',
+          destination: 'App Móvil (Flutter)',
+          direction: 'Unidireccional (Pantalla Táctil)',
+          protocol: 'Mobile UI / Gestos',
+          endpoint: 'App Android / iOS',
+          format: 'Touch Events / Notificaciones',
+          desc: 'Los jugadores usan sus smartphones para revisar actividad social, recibir notificaciones y ver sus medallas.'
+        }
+      },
+
+      // 2. Frontends to Keycloak
+      {
+        id: 'conn-unity-keycloak',
+        from: 'node-unity',
+        to: 'node-keycloak',
+        label: 'OAuth2 (Unity)',
+        category: ['auth'],
+        details: {
+          origin: 'Videojuego (Unity)',
+          destination: 'Keycloak (IdP)',
+          direction: 'Bidireccional (Login -> Token JWT)',
+          protocol: 'HTTPS / OAuth 2.0',
+          endpoint: '/realms/gamehub/protocol/openid-connect/token',
+          method: 'POST',
+          format: 'JSON (Grant Type: Password / Direct Access Grants)',
+          desc: 'Unity envía credenciales y obtiene un JWT firmado con los permisos del jugador.'
+        }
+      },
+      {
+        id: 'conn-pwa-keycloak',
+        from: 'node-pwa',
+        to: 'node-keycloak',
+        label: 'SSO / OIDC (PWA)',
+        category: ['auth'],
+        details: {
+          origin: 'PWA - Tablero (React)',
+          destination: 'Keycloak (IdP)',
+          direction: 'Bidireccional (Single Sign-On Web)',
+          protocol: 'HTTPS / OpenID Connect (OIDC)',
+          endpoint: '/realms/gamehub/protocol/openid-connect/auth',
+          method: 'GET / POST',
+          format: 'Authorization Code Flow + PKCE',
+          desc: 'La PWA permite iniciar sesión con la cuenta global mediante SSO sin necesidad de reingresar datos si ya está autenticado.'
+        }
+      },
+      {
+        id: 'conn-flutter-keycloak',
+        from: 'node-flutter',
+        to: 'node-keycloak',
+        label: 'PKCE Móvil (Flutter)',
+        category: ['auth'],
+        details: {
+          origin: 'App Móvil (Flutter)',
+          destination: 'Keycloak (IdP)',
+          direction: 'Bidireccional (Login Seguro Móvil)',
+          protocol: 'HTTPS / AppAuth OAuth 2.0',
+          endpoint: '/realms/gamehub/protocol/openid-connect/auth',
+          method: 'POST (Token Exchange)',
+          format: 'JSON Code Exchange + PKCE',
+          desc: 'La app Flutter redirige a Keycloak mediante una pestaña segura nativa (Custom Tabs/SFSafari) para obtener el JWT.'
+        }
+      },
+
+      // 3. Frontends to Central API
+      {
+        id: 'conn-unity-api',
+        from: 'node-unity',
+        to: 'node-api',
+        label: 'REST / WSS (Unity)',
+        category: ['auth', 'gameplay'],
+        details: {
+          origin: 'Videojuego (Unity)',
+          destination: 'API Central (Backend)',
+          direction: 'Bidireccional',
+          protocol: 'HTTPS REST / WebSockets (WSS)',
+          endpoint: '/api/v1/game/scores , /ws/matchmaking',
+          method: 'GET, POST, WSS',
+          format: 'JSON / Header: Authorization Bearer <JWT>',
+          desc: 'Unity reporta puntuaciones de partidas y mantiene comunicación en tiempo real vía WebSockets.'
+        }
+      },
+      {
+        id: 'conn-pwa-api',
+        from: 'node-pwa',
+        to: 'node-api',
+        label: 'REST Leaderboard (PWA)',
+        category: ['auth', 'gameplay'],
+        details: {
+          origin: 'PWA - Tablero (React)',
+          destination: 'API Central (Backend)',
+          direction: 'Bidireccional',
+          protocol: 'HTTPS REST',
+          endpoint: '/api/v1/leaderboard/global , /api/v1/user/profile',
+          method: 'GET, PUT',
+          format: 'JSON / Header: Authorization Bearer <JWT>',
+          desc: 'La PWA solicita datos tabulados del leaderboard y permite al jugador actualizar la información pública de su perfil.'
+        }
+      },
+      {
+        id: 'conn-flutter-api',
+        from: 'node-flutter',
+        to: 'node-api',
+        label: 'REST / FCM Token (Flutter)',
+        category: ['auth', 'gameplay'],
+        details: {
+          origin: 'App Móvil (Flutter)',
+          destination: 'API Central (Backend)',
+          direction: 'Bidireccional',
+          protocol: 'HTTPS REST',
+          endpoint: '/api/v1/device/register-push , /api/v1/friends/activity',
+          method: 'GET, POST',
+          format: 'JSON / Header: Authorization Bearer <JWT>',
+          desc: 'La App Móvil envía su Token de FCM para notificaciones Push y consulta la actividad de amigos o el feed social.'
+        }
+      },
+
+      // 4. Backend to Identity, External, Monitoring and Data Layer
+      {
+        id: 'conn-keycloak-api',
+        from: 'node-keycloak',
+        to: 'node-api',
+        label: 'Validación JWKS',
+        category: ['auth'],
+        details: {
+          origin: 'API Central (Backend)',
+          destination: 'Keycloak (IdP)',
+          direction: 'Bidireccional (Cacheo de llaves públicas)',
+          protocol: 'HTTPS REST',
+          endpoint: '/realms/gamehub/protocol/openid-connect/certs',
+          method: 'GET',
+          format: 'JWKS (JSON Web Key Set)',
+          desc: 'El backend descarga y cachea periódicamente el conjunto de llaves públicas de Keycloak para verificar la firma de los JWT emitidos para Unity, PWA o Flutter.'
+        }
+      },
+      {
+        id: 'conn-api-external',
+        from: 'node-api',
+        to: 'node-external',
+        label: 'Push FCM & S3',
+        category: ['gameplay'],
+        details: {
+          origin: 'API Central (Backend)',
+          destination: 'Servicios Externos (FCM, S3, Mail)',
+          direction: 'Outbound',
+          protocol: 'HTTPS REST / Official SDKs',
+          endpoint: 'APIs externas FCM, SendGrid, S3',
+          method: 'POST / PUT',
+          format: 'JSON / Multipart Payload',
+          desc: 'El backend dispara notificaciones Push a través de Firebase Cloud Messaging hacia la App Flutter y gestiona archivos en S3.'
+        }
+      },
+      {
+        id: 'conn-api-monitoring',
+        from: 'node-api',
+        to: 'node-monitoring',
+        label: 'Métricas & Logs',
+        category: ['monitoring'],
+        details: {
+          origin: 'API Central (Backend)',
+          destination: 'Monitoreo (Grafana/Prometheus/Loki)',
+          direction: 'Bidireccional (Scrape / Push)',
+          protocol: 'HTTP Prometheus Exporter / Loki HTTP API',
+          endpoint: '/metrics (Prometheus) , /loki/api/v1/push',
+          method: 'GET / POST',
+          format: 'Prometheus Text Format / Loki JSON Stream',
+          desc: 'Prometheus extrae métricas del servidor mientras que Loki consolida logs de errores producidos en cualquiera de las 3 plataformas.'
+        }
+      },
+      {
+        id: 'conn-api-sqldb',
+        from: 'node-api',
+        to: 'node-sqldb',
+        label: 'Consultas SQL',
+        category: ['gameplay'],
+        details: {
+          origin: 'API Central (Backend)',
+          destination: 'Base de Datos Relacional (SQL)',
+          direction: 'Bidireccional',
+          protocol: 'TCP / Native DB Protocol (MySQL/PG)',
+          endpoint: 'Puerto 5432 (Postgres) / 3306 (MySQL)',
+          method: 'SQL Prepared Statements',
+          format: 'Relational Records',
+          desc: 'Almacena y recupera perfiles, puntuaciones oficiales y relaciones de amistad.'
+        }
+      },
+      {
+        id: 'conn-api-nosqldb',
+        from: 'node-api',
+        to: 'node-nosqldb',
+        label: 'Documentos BSON',
+        category: ['gameplay', 'monitoring'],
+        details: {
+          origin: 'API Central (Backend)',
+          destination: 'Base de Datos NoSQL (MongoDB)',
+          direction: 'Bidireccional',
+          protocol: 'MongoDB Wire Protocol',
+          endpoint: 'mongodb://cluster:27017/gamehub',
+          method: 'Driver Operations (insert, find)',
+          format: 'BSON (Binary JSON)',
+          desc: 'Persiste eventos desestructurados y registros de telemetría de juego.'
+        }
+      },
+      {
+        id: 'conn-api-redis',
+        from: 'node-api',
+        to: 'node-redis',
+        label: 'Caché RESP',
+        category: ['gameplay'],
+        details: {
+          origin: 'API Central (Backend)',
+          destination: 'Caché / Sesiones (Redis)',
+          direction: 'Bidireccional',
+          protocol: 'RESP (Redis Serialization Protocol)',
+          endpoint: 'redis://cache-server:6379',
+          method: 'GET, SET, ZADD, INCR',
+          format: 'Key-Value / Sorted Sets',
+          desc: 'Almacena en memoria las tablas de posiciones para servirlas instantáneamente a la PWA y App Móvil con latencia mínima.'
+        }
+      }
+    ];
+
+    let activeSelection = { type: null, id: null };
+
+    // Function to calculate exact element center anchors
+    function getAnchorPoints(fromElem, toElem) {
+      const containerRect = document.getElementById('diagram-container').getBoundingClientRect();
+      const r1 = fromElem.getBoundingClientRect();
+      const r2 = toElem.getBoundingClientRect();
+
+      const c1 = {
+        x: r1.left + r1.width / 2 - containerRect.left,
+        y: r1.top + r1.height / 2 - containerRect.top
+      };
+      const c2 = {
+        x: r2.left + r2.width / 2 - containerRect.left,
+        y: r2.top + r2.height / 2 - containerRect.top
+      };
+
+      return { c1, c2 };
+    }
+
+    // Draw SVG connections dynamically
+    function updateConnections() {
+      const svgGroup = document.getElementById('dynamic-paths-group');
+      if (!svgGroup) return;
+
+      svgGroup.innerHTML = '';
+
+      connectionsData.forEach(conn => {
+        const fromNode = document.getElementById(conn.from);
+        const toNode = document.getElementById(conn.to);
+
+        if (!fromNode || !toNode) return;
+
+        const { c1, c2 } = getAnchorPoints(fromNode, toNode);
+
+        const dx = c2.x - c1.x;
+        const dy = c2.y - c1.y;
+        
+        let pathD = '';
+        if (Math.abs(dx) > Math.abs(dy)) {
+          const cx1 = c1.x + dx / 2;
+          const cy1 = c1.y;
+          const cx2 = c1.x + dx / 2;
+          const cy2 = c2.y;
+          pathD = `M ${c1.x} ${c1.y} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${c2.x} ${c2.y}`;
+        } else {
+          const cx1 = c1.x;
+          const cy1 = c1.y + dy / 2;
+          const cx2 = c2.x;
+          const cy2 = c1.y + dy / 2;
+          pathD = `M ${c1.x} ${c1.y} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${c2.x} ${c2.y}`;
+        }
+
+        const mx = (c1.x + c2.x) / 2;
+        const my = (c1.y + c2.y) / 2;
+
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('id', `path-group-${conn.id}`);
+        g.setAttribute('class', 'cursor-pointer pointer-events-auto');
+        g.onclick = (e) => {
+          e.stopPropagation();
+          selectConnection(conn.id);
+        };
+
+        const clickPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        clickPath.setAttribute('d', pathD);
+        clickPath.setAttribute('stroke', 'transparent');
+        clickPath.setAttribute('stroke-width', '20');
+        clickPath.setAttribute('fill', 'none');
+
+        const visiblePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        visiblePath.setAttribute('id', `svg-path-${conn.id}`);
+        visiblePath.setAttribute('d', pathD);
+        visiblePath.setAttribute('stroke', '#475569');
+        visiblePath.setAttribute('stroke-width', '2');
+        visiblePath.setAttribute('fill', 'none');
+        visiblePath.setAttribute('class', 'conn-path');
+        visiblePath.setAttribute('marker-end', 'url(#arrow-default)');
+
+        const fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+        fo.setAttribute('x', mx - 70);
+        fo.setAttribute('y', my - 13);
+        fo.setAttribute('width', '140');
+        fo.setAttribute('height', '26');
+        fo.setAttribute('class', 'overflow-visible');
+
+        fo.innerHTML = `
+          <div id="badge-${conn.id}" class="w-full h-full flex items-center justify-center">
+            <span class="px-2 py-0.5 text-[10px] font-mono bg-slate-900/90 text-cyan-300 border border-slate-700 hover:border-cyan-400 rounded-full shadow-md whitespace-nowrap transition transform hover:scale-105">
+              ${conn.label}
+            </span>
+          </div>
+        `;
+
+        g.appendChild(clickPath);
+        g.appendChild(visiblePath);
+        g.appendChild(fo);
+        svgGroup.appendChild(g);
+      });
+
+      if (activeSelection.type === 'node') {
+        applyNodeStyles(activeSelection.id);
+      } else if (activeSelection.type === 'conn') {
+        applyConnectionStyles(activeSelection.id);
+      }
+    }
+
+    // Select Node Event
+    function selectNode(nodeId, event) {
+      if (event) event.stopPropagation();
+      activeSelection = { type: 'node', id: nodeId };
+
+      applyNodeStyles(nodeId);
+      openNodeDrawer(nodeId);
+
+      document.getElementById('selection-status').innerText = `Selección: ${nodesData[nodeId].title}`;
+    }
+
+    // Select Connection Event
+    function selectConnection(connId) {
+      activeSelection = { type: 'conn', id: connId };
+
+      applyConnectionStyles(connId);
+      openConnectionDrawer(connId);
+
+      const conn = connectionsData.find(c => c.id === connId);
+      document.getElementById('selection-status').innerText = `Conexión: ${conn.label}`;
+    }
+
+    // Apply Styles for Node Selection
+    function applyNodeStyles(nodeId) {
+      const relatedConns = connectionsData.filter(c => c.from === nodeId || c.to === nodeId);
+      const relatedNodeIds = new Set();
+      relatedNodeIds.add(nodeId);
+      relatedConns.forEach(c => {
+        relatedNodeIds.add(c.from);
+        relatedNodeIds.add(c.to);
+      });
+
+      Object.keys(nodesData).forEach(id => {
+        const nodeElem = document.getElementById(id);
+        if (!nodeElem) return;
+
+        nodeElem.classList.remove('node-highlighted', 'node-dimmed', 'node-related');
+
+        if (id === nodeId) {
+          nodeElem.classList.add('node-highlighted');
+        } else if (relatedNodeIds.has(id)) {
+          nodeElem.classList.add('node-related');
+        } else {
+          nodeElem.classList.add('node-dimmed');
+        }
+      });
+
+      connectionsData.forEach(c => {
+        const pathElem = document.getElementById(`svg-path-${c.id}`);
+        const badgeElem = document.getElementById(`badge-${c.id}`);
+        if (!pathElem) return;
+
+        pathElem.classList.remove('conn-path-active', 'conn-path-dimmed');
+
+        if (c.from === nodeId || c.to === nodeId) {
+          pathElem.classList.add('conn-path-active');
+          pathElem.setAttribute('stroke', '#38bdf8');
+          pathElem.setAttribute('marker-end', 'url(#arrow-active)');
+          if (badgeElem) badgeElem.style.opacity = '1';
+        } else {
+          pathElem.classList.add('conn-path-dimmed');
+          pathElem.setAttribute('stroke', '#1e293b');
+          pathElem.setAttribute('marker-end', 'url(#arrow-default)');
+          if (badgeElem) badgeElem.style.opacity = '0.2';
+        }
+      });
+    }
+
+    // Apply Styles for Connection Selection
+    function applyConnectionStyles(connId) {
+      const conn = connectionsData.find(c => c.id === connId);
+      if (!conn) return;
+
+      const activeNodes = new Set([conn.from, conn.to]);
+
+      Object.keys(nodesData).forEach(id => {
+        const nodeElem = document.getElementById(id);
+        if (!nodeElem) return;
+
+        nodeElem.classList.remove('node-highlighted', 'node-dimmed', 'node-related');
+
+        if (activeNodes.has(id)) {
+          nodeElem.classList.add('node-highlighted');
+        } else {
+          nodeElem.classList.add('node-dimmed');
+        }
+      });
+
+      connectionsData.forEach(c => {
+        const pathElem = document.getElementById(`svg-path-${c.id}`);
+        const badgeElem = document.getElementById(`badge-${c.id}`);
+        if (!pathElem) return;
+
+        pathElem.classList.remove('conn-path-active', 'conn-path-dimmed');
+
+        if (c.id === connId) {
+          pathElem.classList.add('conn-path-active');
+          pathElem.setAttribute('stroke', '#38bdf8');
+          pathElem.setAttribute('marker-end', 'url(#arrow-active)');
+          if (badgeElem) badgeElem.style.opacity = '1';
+        } else {
+          pathElem.classList.add('conn-path-dimmed');
+          pathElem.setAttribute('stroke', '#1e293b');
+          pathElem.setAttribute('marker-end', 'url(#arrow-default)');
+          if (badgeElem) badgeElem.style.opacity = '0.2';
+        }
+      });
+    }
+
+    // Reset Selection
+    function resetSelection() {
+      activeSelection = { type: null, id: null };
+
+      Object.keys(nodesData).forEach(id => {
+        const nodeElem = document.getElementById(id);
+        if (nodeElem) {
+          nodeElem.classList.remove('node-highlighted', 'node-dimmed', 'node-related');
+        }
+      });
+
+      connectionsData.forEach(c => {
+        const pathElem = document.getElementById(`svg-path-${c.id}`);
+        const badgeElem = document.getElementById(`badge-${c.id}`);
+        if (pathElem) {
+          pathElem.classList.remove('conn-path-active', 'conn-path-dimmed');
+          pathElem.setAttribute('stroke', '#475569');
+          pathElem.setAttribute('marker-end', 'url(#arrow-default)');
+        }
+        if (badgeElem) badgeElem.style.opacity = '1';
+      });
+
+      closeDrawer();
+      document.getElementById('selection-status').innerText = 'Estado: Vista General Completa';
+    }
+
+    // Quick Filters
+    function setFilter(filterType) {
+      resetSelection();
+      if (filterType === 'all') return;
+
+      const matchingConns = connectionsData.filter(c => c.category.includes(filterType));
+      const activeNodeIds = new Set();
+
+      matchingConns.forEach(c => {
+        activeNodeIds.add(c.from);
+        activeNodeIds.add(c.to);
+      });
+
+      Object.keys(nodesData).forEach(id => {
+        const nodeElem = document.getElementById(id);
+        if (!nodeElem) return;
+
+        if (activeNodeIds.has(id)) {
+          nodeElem.classList.add('node-related');
+        } else {
+          nodeElem.classList.add('node-dimmed');
+        }
+      });
+
+      connectionsData.forEach(c => {
+        const pathElem = document.getElementById(`svg-path-${c.id}`);
+        const badgeElem = document.getElementById(`badge-${c.id}`);
+        if (!pathElem) return;
+
+        if (c.category.includes(filterType)) {
+          pathElem.classList.add('conn-path-active');
+          pathElem.setAttribute('stroke', '#38bdf8');
+          pathElem.setAttribute('marker-end', 'url(#arrow-active)');
+          if (badgeElem) badgeElem.style.opacity = '1';
+        } else {
+          pathElem.classList.add('conn-path-dimmed');
+          pathElem.setAttribute('stroke', '#1e293b');
+          if (badgeElem) badgeElem.style.opacity = '0.1';
+        }
+      });
+
+      document.getElementById('selection-status').innerText = `Filtro Activo: ${filterType.toUpperCase()}`;
+    }
+
+    // Canvas click event
+    function handleCanvasClick(event) {
+      if (event.target.id === 'diagram-container' || event.target.id === 'main-content') {
+        resetSelection();
+      }
+    }
+
+    // Open Drawer for Node
+    function openNodeDrawer(nodeId) {
+      const data = nodesData[nodeId];
       if (!data) return;
 
+      document.getElementById('drawer-category').innerText = data.category || 'Componente';
       document.getElementById('drawer-title').innerText = data.title;
       document.getElementById('drawer-desc').innerText = data.desc;
-      
-      // Icon
-      const iconContainer = document.getElementById('drawer-icon');
-      iconContainer.innerHTML = `<i data-lucide="${data.icon}" class="w-6 h-6 ${data.color}"></i>`;
-      
-      // Responsibilities
-      const respList = document.getElementById('drawer-responsibilities');
-      respList.innerHTML = data.responsibilities.map(r => `<li class="flex items-start gap-2"><span>•</span> <span>${r}</span></li>`).join('');
 
-      // Endpoints
-      document.getElementById('drawer-endpoints').innerHTML = `<pre>${data.endpoints}</pre>`;
+      document.getElementById('drawer-s1-title').innerText = 'Tecnologías / Frameworks';
+      document.getElementById('drawer-s1-content').innerText = data.tech;
 
-      // Re-render lucide inside drawer
-      lucide.createIcons();
+      document.getElementById('drawer-s2-title').innerText = 'Responsabilidades Principales';
+      const respList = document.getElementById('drawer-s2-content');
+      respList.innerHTML = data.responsibilities.map(r => `<li class="flex items-start gap-1.5"><span class="text-cyan-400">•</span> <span>${r}</span></li>`).join('');
 
-      // Show drawer
+      document.getElementById('drawer-s3-title').innerText = 'Ejemplo de Payload / Protocolo';
+      document.getElementById('drawer-s3-content').innerText = data.payload;
+
+      showDrawer();
+    }
+
+    // Open Drawer for Connection
+    function openConnectionDrawer(connId) {
+      const conn = connectionsData.find(c => c.id === connId);
+      if (!conn) return;
+
+      const d = conn.details;
+
+      document.getElementById('drawer-category').innerText = 'Flujo de Comunicación';
+      document.getElementById('drawer-title').innerText = conn.label;
+      document.getElementById('drawer-desc').innerText = d.desc;
+
+      document.getElementById('drawer-s1-title').innerText = 'Origen y Destino';
+      document.getElementById('drawer-s1-content').innerHTML = `
+        <div><strong class="text-slate-300">Origen:</strong> ${d.origin}</div>
+        <div><strong class="text-slate-300">Destino:</strong> ${d.destination}</div>
+        <div><strong class="text-slate-300">Dirección:</strong> ${d.direction}</div>
+      `;
+
+      document.getElementById('drawer-s2-title').innerText = 'Detalles Técnicos del Protocolo';
+      const respList = document.getElementById('drawer-s2-content');
+      respList.innerHTML = `
+        <li><strong class="text-slate-200">Protocolo:</strong> ${d.protocol}</li>
+        ${d.method ? `<li><strong class="text-slate-200">Método HTTP:</strong> <span class="px-1.5 py-0.5 bg-cyan-950 text-cyan-300 rounded font-mono">${d.method}</span></li>` : ''}
+        <li><strong class="text-slate-200">Endpoint / Puerto:</strong> ${d.endpoint}</li>
+        <li><strong class="text-slate-200">Formato:</strong> ${d.format}</li>
+      `;
+
+      document.getElementById('drawer-s3-title').innerText = 'Transmisión de Datos';
+      document.getElementById('drawer-s3-content').innerText = `Protocol: ${d.protocol}\nTarget: ${d.endpoint}\nFormat: ${d.format}`;
+
+      showDrawer();
+    }
+
+    function showDrawer() {
       document.getElementById('drawer-backdrop').classList.remove('hidden');
       setTimeout(() => {
         document.getElementById('drawer').classList.remove('drawer-closed');
@@ -533,7 +1347,6 @@
       }, 10);
     }
 
-    // Close Drawer Function
     function closeDrawer() {
       document.getElementById('drawer').classList.remove('drawer-open');
       document.getElementById('drawer').classList.add('drawer-closed');
@@ -542,39 +1355,12 @@
       }, 300);
     }
 
-    // Flow Filter Function
-    function setFlow(flowType) {
-      const cardUnity = document.getElementById('card-unity');
-      const cardPwa = document.getElementById('card-pwa');
-      const cardMobile = document.getElementById('card-mobile');
-      const cardApi = document.getElementById('card-api');
-
-      const pathUnity = document.getElementById('path-unity');
-      const pathPwa = document.getElementById('path-pwa');
-      const pathMobile = document.getElementById('path-mobile');
-
-      // Reset styles
-      [cardUnity, cardPwa, cardMobile, cardApi].forEach(c => c?.classList.remove('active-flow'));
-      [pathUnity, pathPwa, pathMobile].forEach(p => {
-        if (p) p.style.opacity = '0.2';
+    window.onload = function() {
+      setTimeout(updateConnections, 100);
+      window.addEventListener('resize', () => {
+        updateConnections();
       });
-
-      if (flowType === 'all') {
-        [pathUnity, pathPwa, pathMobile].forEach(p => { if(p) p.style.opacity = '1'; });
-      } else if (flowType === 'unity') {
-        cardUnity?.classList.add('active-flow');
-        cardApi?.classList.add('active-flow');
-        if(pathUnity) pathUnity.style.opacity = '1';
-      } else if (flowType === 'pwa') {
-        cardPwa?.classList.add('active-flow');
-        cardApi?.classList.add('active-flow');
-        if(pathPwa) pathPwa.style.opacity = '1';
-      } else if (flowType === 'mobile') {
-        cardMobile?.classList.add('active-flow');
-        cardApi?.classList.add('active-flow');
-        if(pathMobile) pathMobile.style.opacity = '1';
-      }
-    }
+    };
   </script>
 </body>
 </html>
