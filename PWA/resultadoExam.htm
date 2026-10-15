@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PWA Dashboard - Calificaciones Examen Recursos Dinámicos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --card-bg: rgba(22, 31, 48, 0.7);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --accent-purple: #8b5cf6;
+      --accent-cyan: #06b6d4;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 10% 10%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+        radial-gradient(at 90% 90%, rgba(6, 182, 212, 0.15) 0px, transparent 50%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Banner PWA Header */
+    .pwa-header {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 1.8rem;
+      margin-bottom: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.5rem;
+      box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+    }
+
+    .pwa-title {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .pwa-icon {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+    }
+
+    .pwa-badges {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      padding: 0.35rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .badge-purple { background: rgba(139, 92, 246, 0.15); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.3); }
+    .badge-cyan { background: rgba(6, 182, 212, 0.15); color: #67e8f9; border: 1px solid rgba(6, 182, 212, 0.3); }
+    .badge-green { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+    /* Widgets Estadísticos */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(to right, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* Podio Top 3 */
+    .podium-section {
+      margin-bottom: 2.5rem;
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .podium-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .podium-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .podium-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .podium-card.gold { border-color: rgba(245, 158, 11, 0.6); box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.2); }
+    .podium-card.silver { border-color: rgba(148, 163, 184, 0.6); box-shadow: 0 10px 25px -5px rgba(148, 163, 184, 0.2); }
+    .podium-card.bronze { border-color: rgba(217, 119, 6, 0.6); box-shadow: 0 10px 25px -5px rgba(217, 119, 6, 0.2); }
+
+    .podium-rank {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 1.8rem;
+    }
+
+    .podium-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .podium-id {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    /* Panel de Registro */
+    .controls-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: rgba(15, 23, 42, 0.6);
+      color: var(--text-main);
+      font-size: 0.9rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
+    }
+
+    button.btn-add {
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      color: #fff;
+    }
+
+    button.btn-add:hover {
+      opacity: 0.9;
+      transform: scale(1.02);
+    }
+
+    /* Tabla */
+    .table-wrapper {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      overflow-x: auto;
+      box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background: rgba(15, 23, 42, 0.8);
+      padding: 1rem 1.25rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.9rem;
+    }
+
+    tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      max-width: 120px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 0.5rem;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 10px;
+      background: linear-gradient(to right, var(--accent-cyan), var(--accent-green));
+    }
+
+    .rank-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .rank-1 { background: var(--accent-amber); color: #000; }
+    .rank-2 { background: #94a3b8; color: #000; }
+    .rank-3 { background: #d97706; color: #fff; }
+
+    .status-tag {
+      padding: 0.25rem 0.6rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .status-100 { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .status-high { background: rgba(6, 182, 212, 0.2); color: #38bdf8; }
+    .status-mid { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    .status-low { background: rgba(244, 63, 94, 0.2); color: #fb7185; }
+    .status-pending { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- PWA Header -->
+    <header class="pwa-header">
+      <div class="pwa-title">
+        <div class="pwa-icon">⚡</div>
+        <div>
+          <h2>PWA Examen: Recursos Dinámicos</h2>
+          <p style="color: var(--text-muted); font-size: 0.85rem;">Tablero Interactivo de Calificaciones & Ranking</p>
+        </div>
+      </div>
+      <div class="pwa-badges">
+        <span class="badge badge-purple">● ServiceWorker Active</span>
+        <span class="badge badge-cyan">⚙ Dynamic Array Engine</span>
+        <span class="badge badge-green">⚡ PWA Ready</span>
+      </div>
+    </header>
+
+    <!-- Stats Widgets -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-total">0</div>
+        <div class="stat-label">Total Alumnos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-avg-prec">0%</div>
+        <div class="stat-label">Precisión Promedio</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-top-score">0</div>
+        <div class="stat-label">Puntuación Máxima</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-eval-count">0</div>
+        <div class="stat-label">Evaluaciones Validadas</div>
+      </div>
+    </div>
+
+    <!-- Podio Top 3 -->
+    <section class="podium-section">
+      <div class="section-title">🏆 Podio de Honor (Top 3)</div>
+      <div class="podium-grid" id="podium-container">
+        <!-- Generado dinámicamente -->
+      </div>
+    </section>
+
+    <!-- Panel de Agregar/Actualizar -->
+    <section class="controls-panel">
+      <div class="section-title">➕ Agregar Nuevo Alumno / Actualizar Registro</div>
+      <form id="student-form" onsubmit="agregarOActualizarEstudiante(event)">
+        <div class="form-grid">
+          <input type="text" id="input-id" placeholder="Matrícula (ej: 230999)" required>
+          <input type="text" id="input-nombre" placeholder="Nombre Completo" required>
+          <input type="number" id="input-precision" placeholder="Precisión % (0-100)" min="0" max="100">
+          <input type="number" id="input-puntuacion" placeholder="Puntuación (ej: 6500)" min="0">
+          <input type="text" id="input-ranking" placeholder="Rank Capturado (ej: 1/5)">
+          <button type="submit" class="btn-add">Guardar en Arreglo</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Filtros de búsqueda y orden -->
+    <div style="margin-bottom: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+      <input type="text" id="search-input" placeholder="🔍 Buscar por nombre o matrícula..." oninput="filtrarTabla()" style="max-width: 350px;">
+      <select id="sort-select" onchange="ordenarYRenderizar()" style="max-width: 250px;">
+        <option value="puntuacion-desc">Ordenar por Puntuación (Mayor a Menor)</option>
+        <option value="precision-desc">Ordenar por Precisión (Mayor a Menor)</option>
+        <option value="nombre-asc">Ordenar por Nombre (A - Z)</option>
+      </select>
+    </div>
+
+    <!-- Tabla Dinámica -->
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Rank Actual</th>
+            <th>Matrícula</th>
+            <th>Responsable del Examen</th>
+            <th>Precisión</th>
+            <th>Puntuación</th>
+            <th>Rank Capturado</th>
+            <th>Estatus</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <!-- Filas generadas dinámicamente -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // ARREGLO DE DATOS FUENTE (AQUÍ PUEDES AGREGAR MÁS PERSONAS DIRECTAMENTE)
+    // =========================================================================
+    const estudiantes = [
+      { id: "230237", nombre: "Citlalli Pérez Dionicio", precision: 100, puntuacion: 6900, rankingOrigen: "2/2" },
+      { id: "230447", nombre: "Yazmin Gutierrez Hernández", precision: 100, puntuacion: 6900, rankingOrigen: "1/2" },
+      { id: "230142", nombre: "Obed Guzmán Flores", precision: 90, puntuacion: 6100, rankingOrigen: "1/7" },
+      { id: "220859", nombre: "Mauricio Rosales Gabriel", precision: 80, puntuacion: 4800, rankingOrigen: "3/9" },
+      { id: "230629", nombre: "Jose Arturo Garcia Gonzalez", precision: 80, puntuacion: 4800, rankingOrigen: "9/12" },
+      { id: "230881", nombre: "Michelle Castro Otero", precision: 80, puntuacion: 4800, rankingOrigen: "6/11" },
+      { id: "230260", nombre: "Diego Miguel Rivera Chavez", precision: 70, puntuacion: 4300, rankingOrigen: "12/15" },
+      { id: "230052", nombre: "Adrián Pérez Jiménez", precision: 60, puntuacion: 4200, rankingOrigen: "9/10" },
+      { id: "230417", nombre: "José Francisco Flores Amador", precision: 50, puntuacion: 3000, rankingOrigen: "2/6" },
+      { id: "230362", nombre: "Brisa Nallely Garcia Gregorio", precision: 90, puntuacion: 5400, rankingOrigen: "N/A" },
+      { id: "230187", nombre: "Carlos Daniel Garcia Pluma", precision: 80, puntuacion: 7300, rankingOrigen: "N/A" },
+      { id: "230892", nombre: "Derek Sesni Carreño", precision: 70, puntuacion: 4200, rankingOrigen: "N/A" },
+      { id: "230425", nombre: "Edwin Hernández Campos", precision: 100, puntuacion: 6500, rankingOrigen: "N/A" },
+      { id: "230028", nombre: "Jesús Domínguez Ramírez", precision: 100, puntuacion: 6900, rankingOrigen: "N/A" },
+      { id: "230028", nombre: "Erick Matias Granillo Mejia", precision: 90, puntuacion: 5900, rankingOrigen: "N/A" }
+    ];
+
+    // Calcula la etiqueta de estatus visual
+    function calcularEstatus(prec) {
+      if (prec === null || prec === undefined) return { label: "Pendiente", class: "status-pending" };
+      if (prec === 100) return { label: "Perfecto (100%)", class: "status-100" };
+      if (prec >= 80) return { label: "Excelente", class: "status-high" };
+      if (prec >= 60) return { label: "Regular", class: "status-mid" };
+      return { label: "Bajo", class: "status-low" };
+    }
+
+    // Actualiza las tarjetas superiores de métricas
+    function actualizarEstadisticas() {
+      document.getElementById('stat-total').innerText = estudiantes.length;
+      
+      const evaluados = estudiantes.filter(e => e.precision !== null);
+      document.getElementById('stat-eval-count').innerText = evaluados.length;
+
+      if (evaluados.length > 0) {
+        const sumaPrec = evaluados.reduce((acc, curr) => acc + curr.precision, 0);
+        const avgPrec = (sumaPrec / evaluados.length).toFixed(1);
+        document.getElementById('stat-avg-prec').innerText = `${avgPrec}%`;
+
+        const maxScore = Math.max(...evaluados.map(e => e.puntuacion || 0));
+        document.getElementById('stat-top-score').innerText = maxScore.toLocaleString();
+      }
+    }
+
+    // Renderiza las 3 tarjetas del Podio Top 3
+    function renderizarPodio(listaOrdenada) {
+      const podioContainer = document.getElementById('podium-container');
+      podioContainer.innerHTML = '';
+
+      const top3 = listaOrdenada.filter(e => e.puntuacion !== null).slice(0, 3);
+      const clasesRank = ['gold', 'silver', 'bronze'];
+      const medallas = ['🥇', '🥈', '🥉'];
+
+      top3.forEach((est, idx) => {
+        const card = document.createElement('div');
+        card.className = `podium-card ${clasesRank[idx]}`;
+        card.innerHTML = `
+          <div class="podium-rank">${medallas[idx]}</div>
+          <div class="podium-name">${est.nombre}</div>
+          <div class="podium-id">Matrícula: ${est.id}</div>
+          <div style="font-size: 1.4rem; font-weight: 800; color: var(--accent-cyan);">
+            ${est.puntuacion ? est.puntuacion.toLocaleString() : 0} <span style="font-size:0.8rem; color:var(--text-muted)">pts</span>
+          </div>
+          <div style="margin-top:0.5rem; font-size: 0.85rem; color: var(--accent-green);">
+            Precisión: ${est.precision}%
+          </div>
+        `;
+        podioContainer.appendChild(card);
+      });
+    }
+
+    // Procesa el ordenamiento, filtrado y pintado de la tabla
+    function ordenarYRenderizar() {
+      const criterio = document.getElementById('sort-select').value;
+      const busqueda = document.getElementById('search-input').value.toLowerCase();
+
+      let copiaEstudiantes = [...estudiantes];
+
+      // Ordenar según selección
+      copiaEstudiantes.sort((a, b) => {
+        if (criterio === 'puntuacion-desc') {
+          return (b.puntuacion || -1) - (a.puntuacion || -1);
+        } else if (criterio === 'precision-desc') {
+          return (b.precision || -1) - (a.precision || -1);
+        } else if (criterio === 'nombre-asc') {
+          return a.nombre.localeCompare(b.nombre);
+        }
+      });
+
+      renderizarPodio(copiaEstudiantes);
+
+      // Filtrar por texto de búsqueda
+      const filtrados = copiaEstudiantes.filter(e => 
+        e.nombre.toLowerCase().includes(busqueda) || e.id.toLowerCase().includes(busqueda)
+      );
+
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+
+      filtrados.forEach((est, index) => {
+        const status = calcularEstatus(est.precision);
+        const rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : '';
+        const rankNum = index + 1;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><div class="rank-badge ${rankClass}">${rankNum}</div></td>
+          <td style="font-weight: 600; color: var(--accent-cyan);">${est.id}</td>
+          <td style="font-weight: 600;">${est.nombre}</td>
+          <td>
+            ${est.precision !== null ? `
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: ${est.precision}%;"></div>
+              </div>
+              <span style="font-weight:700">${est.precision}%</span>
+            ` : '<span style="color:var(--text-muted)">N/A</span>'}
+          </td>
+          <td style="font-weight:700">${est.puntuacion !== null ? est.puntuacion.toLocaleString() : 'N/A'}</td>
+          <td style="color:var(--text-muted)">${est.rankingOrigen || 'N/A'}</td>
+          <td><span class="status-tag ${status.class}">${status.label}</span></td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      actualizarEstadisticas();
+    }
+
+    function filtrarTabla() {
+      ordenarYRenderizar();
+    }
+
+    // Agregar o actualizar estudiante dinámicamente
+    function agregarOActualizarEstudiante(event) {
+      event.preventDefault();
+
+      const id = document.getElementById('input-id').value.trim();
+      const nombre = document.getElementById('input-nombre').value.trim();
+      const precisionVal = document.getElementById('input-precision').value;
+      const puntuacionVal = document.getElementById('input-puntuacion').value;
+      const rankingVal = document.getElementById('input-ranking').value.trim();
+
+      const precision = precisionVal !== "" ? parseFloat(precisionVal) : null;
+      const puntuacion = puntuacionVal !== "" ? parseInt(puntuacionVal) : null;
+
+      const idx = estudiantes.findIndex(e => e.id === id);
+
+      if (idx !== -1) {
+        // Actualizar registro existente
+        estudiantes[idx].nombre = nombre;
+        if (precision !== null) estudiantes[idx].precision = precision;
+        if (puntuacion !== null) estudiantes[idx].puntuacion = puntuacion;
+        if (rankingVal !== "") estudiantes[idx].rankingOrigen = rankingVal;
+      } else {
+        // Agregar nuevo registro
+        estudiantes.push({
+          id,
+          nombre,
+          precision,
+          puntuacion,
+          rankingOrigen: rankingVal || "N/A"
+        });
+      }
+
+      document.getElementById('student-form').reset();
+      ordenarYRenderizar();
+    }
+
+    // Carga inicial
+    window.onload = () => {
+      ordenarYRenderizar();
+    };
+  </script>
+</body>
+</html>
